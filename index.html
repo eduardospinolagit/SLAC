@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sipos Studio — Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100vh;-webkit-font-smoothing:antialiased}
+:root{
+  --green:#22c55e;--green-dim:#16a34a;--green-bg:rgba(34,197,94,.08);
+  --amber:#f59e0b;--red:#ef4444;--purple:#8b5cf6;--blue:#3b82f6;
+  --card:#161616;--border:#222;--gray:#555;--light:#999;
+}
+.layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+@media(max-width:768px){.layout{grid-template-columns:1fr}}
+
+/* SIDEBAR */
+.sidebar{background:#0d0d0d;border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+@media(max-width:768px){.sidebar{display:none}}
+.sb-logo{padding:20px;border-bottom:1px solid var(--border)}
+.sb-logo .name{font-size:1rem;font-weight:700}.sb-logo .name span{color:var(--green)}
+.sb-logo .sub{font-size:.72rem;color:var(--gray);margin-top:2px}
+.sb-section{padding:16px 10px 4px}
+.sb-label{font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray);padding:0 8px;margin-bottom:4px}
+.sb-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;cursor:pointer;font-size:.85rem;color:var(--light);transition:all .15s;margin-bottom:1px}
+.sb-item:hover{background:#1a1a1a;color:#fff}
+.sb-item.active{background:var(--green-bg);color:var(--green);font-weight:500}
+.sb-item .ico{font-size:15px;width:18px;text-align:center}
+.sb-footer{margin-top:auto;padding:14px 18px;border-top:1px solid var(--border)}
+.sb-footer p{font-size:.72rem;color:var(--gray)}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;min-height:100vh}
+.page{display:none;flex:1}
+.page.active{display:flex;flex-direction:column}
+
+/* TOPBAR */
+.topbar{padding:14px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:#0d0d0d;position:sticky;top:0;z-index:10;flex-shrink:0}
+.topbar h1{font-size:1rem;font-weight:600}
+.tbar-right{display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:.82rem;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'Inter',sans-serif}
+.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:var(--green-dim)}
+.btn-ghost{background:transparent;color:var(--light);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--green);color:#fff}
+.btn-red{background:transparent;color:var(--red);border:1px solid var(--border)}.btn-red:hover{background:var(--red);color:#fff}
+
+/* CONTENT */
+.content{padding:24px 28px;flex:1;overflow-y:auto}
+@media(max-width:768px){.content{padding:14px}}
+
+/* CARDS */
+.cards-grid{display:grid;gap:10px;margin-bottom:22px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g5{grid-template-columns:repeat(5,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:1000px){.g4,.g5{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.g4,.g5,.g2{grid-template-columns:1fr}}
+
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px}
+.kpi .k-label{font-size:.7rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--gray);margin-bottom:6px}
+.kpi .k-val{font-size:1.6rem;font-weight:700;line-height:1;margin-bottom:3px}
+.kpi .k-sub{font-size:.75rem;color:var(--gray)}
+.kv-green{color:var(--green)}.kv-red{color:var(--red)}.kv-amber{color:var(--amber)}.kv-purple{color:var(--purple)}.kv-blue{color:var(--blue)}.kv-white{color:#fff}
+
+/* META */
+.meta-box{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px 18px;margin-bottom:22px}
+.meta-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:.85rem}
+.meta-top strong{font-weight:600}
+.meta-bar{height:7px;background:var(--border);border-radius:999px;overflow:hidden}
+.meta-fill{height:100%;background:var(--green);border-radius:999px;transition:width .5s}
+
+/* CHARTS */
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
+@media(max-width:900px){.chart-row{grid-template-columns:1fr}}
+.chart-box{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:18px}
+.chart-box h3{font-size:.85rem;font-weight:600;color:var(--light);margin-bottom:14px}
+.chart-wrap{position:relative;height:200px}
+
+/* TABLE */
+.tbox{background:var(--card);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin-bottom:16px}
+.tbox-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.tbox-head h3{font-size:.88rem;font-weight:600}
+table{width:100%;border-collapse:collapse}
+thead th{padding:9px 14px;font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--gray);text-align:left;background:#111}
+tbody td{padding:11px 14px;font-size:.83rem;border-top:1px solid var(--border)}
+tbody tr:hover td{background:#1a1a1a}
+.tag{display:inline-block;font-size:.7rem;padding:2px 8px;border-radius:999px;font-weight:500}
+.t-in{background:rgba(34,197,94,.15);color:#4ade80}
+.t-out{background:rgba(239,68,68,.15);color:#f87171}
+.t-pend{background:rgba(245,158,11,.15);color:#fbbf24}
+
+/* MAPA */
+.mapa-sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.mapa-sec-head h2{font-size:.95rem;font-weight:600}
+.cat-card{background:var(--card);border:1px solid var(--border);border-radius:11px;margin-bottom:10px;overflow:hidden}
+.cat-head{display:flex;align-items:center;gap:10px;padding:14px 18px;cursor:pointer;transition:background .15s}
+.cat-head:hover{background:#1a1a1a}
+.cat-ico{font-size:16px;width:32px;height:32px;background:#1a1a1a;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cat-inf{flex:1}
+.cat-title{font-size:.88rem;font-weight:600;margin-bottom:2px}
+.cat-prog{display:flex;align-items:center;gap:8px}
+.cat-bar{flex:1;height:3px;background:var(--border);border-radius:999px;overflow:hidden;max-width:100px}
+.cat-fill{height:100%;background:var(--green);border-radius:999px}
+.cat-pct{font-size:.72rem;color:var(--gray)}
+.cat-arr{font-size:.72rem;color:var(--gray);transition:transform .2s}
+.cat-arr.open{transform:rotate(180deg)}
+.cat-body{display:none;padding:0 18px 14px;border-top:1px solid var(--border)}
+.cat-body.open{display:block}
+.items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:7px;margin-top:10px}
+.it{display:flex;align-items:flex-start;gap:8px;padding:10px;background:#111;border:1px solid var(--border);border-radius:7px;transition:all .15s}
+.it:hover{border-color:#333}
+.it-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.d-ok{background:var(--green)}.d-doing{background:var(--amber)}.d-nope{background:var(--red)}.d-future{background:var(--purple)}
+.it-body{flex:1;min-width:0}
+.it-title{font-size:.82rem;font-weight:500;margin-bottom:2px;line-height:1.3}
+.it-desc{font-size:.72rem;color:var(--gray);line-height:1.4}
+.it-badge{display:inline-block;font-size:.68rem;padding:2px 6px;border-radius:999px;margin-top:4px;font-weight:500}
+.b-ok{background:rgba(34,197,94,.15);color:#4ade80}
+.b-doing{background:rgba(245,158,11,.15);color:#fbbf24}
+.b-nope{background:rgba(239,68,68,.15);color:#f87171}
+.b-future{background:rgba(139,92,246,.15);color:#a78bfa}
+.it-acts{display:flex;gap:3px;margin-top:5px}
+.it-btn{font-size:.68rem;padding:2px 7px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--gray);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
+.it-btn:hover{border-color:var(--green);color:var(--green)}
+
+/* AI */
+.ai-wrap{background:var(--card);border:1px solid var(--border);border-radius:11px;overflow:hidden;flex:1;display:flex;flex-direction:column}
+.ai-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.ai-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.ai-title{font-size:.9rem;font-weight:600}
+.ai-sub{font-size:.72rem;color:var(--gray)}
+.ai-msgs{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:10px;min-height:300px;max-height:420px}
+.msg{max-width:82%;padding:9px 13px;border-radius:9px;font-size:.85rem;line-height:1.6;white-space:pre-wrap}
+.msg-ai{background:#1a1a1a;border:1px solid var(--border);color:#ddd;align-self:flex-start;border-radius:3px 9px 9px 9px}
+.msg-user{background:var(--green);color:#fff;align-self:flex-end;border-radius:9px 3px 9px 9px}
+.msg-load{display:flex;gap:4px;align-items:center;padding:10px 14px}
+.msg-load span{width:5px;height:5px;border-radius:50%;background:var(--gray);animation:bop .8s infinite}
+.msg-load span:nth-child(2){animation-delay:.15s}
+.msg-load span:nth-child(3){animation-delay:.3s}
+@keyframes bop{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.qbtns{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px}
+.qbtn{font-size:.72rem;padding:4px 9px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--gray);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
+.qbtn:hover{border-color:var(--green);color:var(--green)}
+.ai-input-row{padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:7px;flex-shrink:0}
+.ai-input{flex:1;background:#111;border:1px solid var(--border);border-radius:7px;padding:9px 13px;color:#fff;font-family:'Inter',sans-serif;font-size:.85rem;outline:none;transition:border-color .15s;resize:none}
+.ai-input:focus{border-color:var(--green)}
+.ai-input::placeholder{color:var(--gray)}
+.send-btn{background:var(--green);border:none;border-radius:7px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.send-btn:hover{background:var(--green-dim)}
+
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.mo.open{display:flex}
+.mo-box{background:#111;border:1px solid var(--border);border-radius:14px;padding:22px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto}
+.mo-box h3{font-size:.95rem;font-weight:600;margin-bottom:18px}
+.fg{margin-bottom:14px}
+.fg label{font-size:.72rem;font-weight:600;color:var(--gray);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em}
+.fi{width:100%;background:#0d0d0d;border:1px solid var(--border);border-radius:7px;padding:9px 13px;color:#fff;font-family:'Inter',sans-serif;font-size:.85rem;outline:none;transition:border-color .15s}
+.fi:focus{border-color:var(--green)}
+.fs{width:100%;background:#0d0d0d;border:1px solid var(--border);border-radius:7px;padding:9px 13px;color:#fff;font-family:'Inter',sans-serif;font-size:.85rem;outline:none}
+.fs option{background:#111}
+.mo-acts{display:flex;gap:8px;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="name">Sipos<span>.</span>Studio</div>
+    <div class="sub">Command Center</div>
+  </div>
+  <div class="sb-section">
+    <div class="sb-label">Páginas</div>
+    <div class="sb-item active" id="nav-dashboard" onclick="goPage('dashboard')"><span class="ico">📊</span> Dashboard</div>
+    <div class="sb-item" id="nav-financeiro" onclick="goPage('financeiro')"><span class="ico">💰</span> Financeiro</div>
+    <div class="sb-item" id="nav-mapa" onclick="goPage('mapa')"><span class="ico">🗺️</span> Mapa Mental</div>
+    <div class="sb-item" id="nav-ia" onclick="goPage('ia')"><span class="ico">🤖</span> Assistente IA</div>
+  </div>
+  <div class="sb-section">
+    <div class="sb-label">Categorias</div>
+    <div class="sb-item" onclick="goScroll('identidade')"><span class="ico">🏷️</span> Identidade</div>
+    <div class="sb-item" onclick="goScroll('presenca')"><span class="ico">🌐</span> Presença Digital</div>
+    <div class="sb-item" onclick="goScroll('portfolio')"><span class="ico">💼</span> Portfólio</div>
+    <div class="sb-item" onclick="goScroll('prospeccao')"><span class="ico">📱</span> Prospecção</div>
+    <div class="sb-item" onclick="goScroll('servicos')"><span class="ico">⚙️</span> Serviços</div>
+    <div class="sb-item" onclick="goScroll('crescimento')"><span class="ico">📈</span> Crescimento</div>
+  </div>
+  <div class="sb-footer"><p>Sipos Studio © 2026</p></div>
+</aside>
+
+<main class="main">
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="topbar">
+    <h1>Dashboard</h1>
+    <div class="tbar-right"><span id="dash-date" style="font-size:.78rem;color:var(--gray)"></span></div>
+  </div>
+  <div class="content">
+    <div style="font-size:.72rem;font-weight:600;color:var(--gray);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">Financeiro</div>
+    <div class="cards-grid g5" id="dash-kpis"></div>
+    <div class="meta-box" id="dash-meta"></div>
+    <div class="chart-row">
+      <div class="chart-box"><h3>Receita mensal (R$)</h3><div class="chart-wrap"><canvas id="c-receita"></canvas></div></div>
+      <div class="chart-box"><h3>Despesas por categoria</h3><div class="chart-wrap"><canvas id="c-gastos"></canvas></div></div>
+    </div>
+    <div style="font-size:.72rem;font-weight:600;color:var(--gray);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">Progresso do negócio</div>
+    <div class="cards-grid g4" id="dash-mapa"></div>
+    <div class="tbox">
+      <div class="tbox-head"><h3>Últimas transações</h3><button class="btn btn-ghost" style="font-size:.78rem;padding:5px 11px" onclick="goPage('financeiro')">Ver todas →</button></div>
+      <table><thead><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr></thead><tbody id="dash-tx"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- FINANCEIRO -->
+<div class="page" id="page-financeiro">
+  <div class="topbar">
+    <h1>Controle Financeiro</h1>
+    <div class="tbar-right">
+      <button class="btn btn-red" onclick="openFin('saida')">− Despesa</button>
+      <button class="btn btn-green" onclick="openFin('entrada')">+ Receita</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="cards-grid g5" id="fin-kpis"></div>
+    <div class="meta-box" id="fin-meta"></div>
+    <div class="chart-row">
+      <div class="chart-box"><h3>Receita vs Despesa por mês</h3><div class="chart-wrap"><canvas id="c-mensal"></canvas></div></div>
+      <div class="chart-box"><h3>Categorias de gastos</h3><div class="chart-wrap"><canvas id="c-cats"></canvas></div></div>
+    </div>
+    <div class="tbox">
+      <div class="tbox-head">
+        <h3>Transações</h3>
+        <div style="display:flex;gap:7px">
+          <select class="fs" id="f-tipo" onchange="renderTx()" style="padding:5px 10px;font-size:.78rem;width:auto"><option value="">Todos</option><option value="entrada">Entradas</option><option value="saida">Saídas</option></select>
+          <select class="fs" id="f-mes" onchange="renderTx()" style="padding:5px 10px;font-size:.78rem;width:auto">
+            <option value="">Todos meses</option>
+            <option value="-01-">Janeiro</option><option value="-02-">Fevereiro</option><option value="-03-">Março</option>
+            <option value="-04-">Abril</option><option value="-05-">Maio</option><option value="-06-">Junho</option>
+            <option value="-07-">Julho</option><option value="-08-">Agosto</option><option value="-09-">Setembro</option>
+            <option value="-10-">Outubro</option><option value="-11-">Novembro</option><option value="-12-">Dezembro</option>
+          </select>
+        </div>
+      </div>
+      <table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Cliente</th><th>Tipo</th><th>Valor</th><th></th></tr></thead><tbody id="fin-tx"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- MAPA -->
+<div class="page" id="page-mapa">
+  <div class="topbar">
+    <h1>Mapa Mental</h1>
+    <div class="tbar-right">
+      <button class="btn btn-ghost" onclick="openItem()">+ Item</button>
+      <button class="btn btn-green" onclick="exportar()">↓ Exportar</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="cards-grid g4" id="mapa-kpis"></div>
+    <div class="mapa-sec-head">
+      <h2>Estrutura do negócio</h2>
+      <button class="btn btn-ghost" style="font-size:.78rem;padding:5px 11px" onclick="toggleAll()">Expandir tudo</button>
+    </div>
+    <div id="cats-wrap"></div>
+  </div>
+</div>
+
+<!-- IA -->
+<div class="page" id="page-ia">
+  <div class="topbar"><h1>Assistente IA</h1></div>
+  <div class="content" style="display:flex;flex-direction:column;height:calc(100vh - 57px)">
+    <div class="ai-wrap">
+      <div class="ai-head">
+        <div class="ai-dot"></div>
+        <div><div class="ai-title">Assistente Sipos Studio</div><div class="ai-sub">IA com contexto completo do negócio</div></div>
+      </div>
+      <div class="ai-msgs" id="ai-msgs"><div class="msg msg-ai">Oi Eduardo! Estou aqui para ajudar com estratégias, scripts de vendas, análises e qualquer dúvida sobre a Sipos Studio. O que precisa?</div></div>
+      <div class="qbtns">
+        <button class="qbtn" onclick="qMsg('Quais são as prioridades mais urgentes agora?')">🎯 Prioridades</button>
+        <button class="qbtn" onclick="qMsg('Como fechar meu primeiro cliente esta semana?')">💰 Fechar cliente</button>
+        <button class="qbtn" onclick="qMsg('Crie um script de follow-up para leads que não responderam')">📱 Script follow-up</button>
+        <button class="qbtn" onclick="qMsg('Analise meu progresso e dê um diagnóstico honesto')">📊 Diagnóstico</button>
+        <button class="qbtn" onclick="qMsg('Como precificar automação de WhatsApp e gestão de tráfego?')">💡 Precificação</button>
+      </div>
+      <div class="ai-input-row">
+        <textarea class="ai-input" id="ai-inp" placeholder="Pergunte qualquer coisa sobre seu negócio..." rows="1" onkeydown="aiKey(event)"></textarea>
+        <button class="send-btn" onclick="sendAI()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- MODAL FINANCEIRO -->
+<div class="mo" id="mo-fin">
+  <div class="mo-box">
+    <h3 id="mo-fin-title">Nova Receita</h3>
+    <div class="fg"><label>Descrição *</label><input class="fi" id="fin-desc" placeholder="Ex: Site Iron House — 50% entrada"/></div>
+    <div class="fg"><label>Valor (R$) *</label><input class="fi" id="fin-val" type="number" placeholder="797.00" step="0.01" min="0"/></div>
+    <div class="fg"><label>Data *</label><input class="fi" id="fin-data" type="date"/></div>
+    <div class="fg"><label>Categoria</label>
+      <select class="fs" id="fin-cat">
+        <option value="Site">Site</option><option value="Google Meu Negócio">Google Meu Negócio</option>
+        <option value="Tráfego">Tráfego</option><option value="Automação">Automação</option>
+        <option value="Ferramentas">Ferramentas</option><option value="Marketing">Marketing</option>
+        <option value="Assinatura">Assinatura</option><option value="Outros">Outros</option>
+      </select>
+    </div>
+    <div class="fg" id="fin-status-wrap"><label>Status</label>
+      <select class="fs" id="fin-status"><option value="recebido">Recebido</option><option value="pendente">Pendente</option></select>
+    </div>
+    <div class="fg"><label>Cliente</label><input class="fi" id="fin-cliente" placeholder="Nome do cliente (opcional)"/></div>
+    <div class="mo-acts">
+      <button class="btn btn-green" onclick="saveFin()">Salvar</button>
+      <button class="btn btn-ghost" onclick="closeMo('fin')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ITEM MAPA -->
+<div class="mo" id="mo-item">
+  <div class="mo-box">
+    <h3>Adicionar item</h3>
+    <div class="fg"><label>Categoria</label><select class="fs" id="item-cat"></select></div>
+    <div class="fg"><label>Título *</label><input class="fi" id="item-title" placeholder="Ex: Criar conta no Instagram"/></div>
+    <div class="fg"><label>Descrição</label><input class="fi" id="item-desc" placeholder="Detalhes sobre este item"/></div>
+    <div class="fg"><label>Status</label>
+      <select class="fs" id="item-status">
+        <option value="nope">Faltando</option><option value="doing">Em andamento</option>
+        <option value="ok">Feito</option><option value="future">Futuro</option>
+      </select>
+    </div>
+    <div class="mo-acts">
+      <button class="btn btn-green" onclick="saveItem()">Salvar</button>
+      <button class="btn btn-ghost" onclick="closeMo('item')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DK='sipos_dados_v2', FK='sipos_fin_v2';
+let charts={}, finTipo='entrada', allOpen=false;
+
+const dadosDefault=[
+  {id:'identidade',ico:'🏷️',title:'Identidade & Marca',items:[
+    {id:'i1',title:'Nome comercial',desc:'Sipos Studio',s:'ok'},
+    {id:'i2',title:'Logo',desc:'Símbolo diamante verde PNG',s:'ok'},
+    {id:'i3',title:'Paleta de cores',desc:'Preto #0a0a0a + Verde #22c55e',s:'ok'},
+    {id:'i4',title:'Tipografia',desc:'Inter definida',s:'ok'},
+    {id:'i5',title:'Slogan',desc:'Frase de posicionamento da marca',s:'nope'},
+    {id:'i6',title:'Manual de marca',desc:'Guia de uso da identidade visual',s:'future'},
+  ]},
+  {id:'presenca',ico:'🌐',title:'Presença Digital',items:[
+    {id:'p1',title:'Landing page',desc:'siposstudio.vercel.app no ar',s:'ok'},
+    {id:'p2',title:'Domínio próprio',desc:'siposstudio.com.br',s:'nope'},
+    {id:'p3',title:'WhatsApp Business',desc:'Configurado com nome e foto',s:'ok'},
+    {id:'p4',title:'Instagram @siposstudio',desc:'Não criado ainda',s:'nope'},
+    {id:'p5',title:'Google Meu Negócio',desc:'Perfil não criado ainda',s:'nope'},
+    {id:'p6',title:'Email profissional',desc:'contato@siposstudio.com.br',s:'nope'},
+    {id:'p7',title:'Analytics',desc:'Vercel Analytics ativo',s:'ok'},
+  ]},
+  {id:'portfolio',ico:'💼',title:'Portfólio & Cases',items:[
+    {id:'pf1',title:'Iron House Brusque',desc:'Case fictício no portfólio',s:'ok'},
+    {id:'pf2',title:'Iron House Canaã',desc:'Prévia enviada — aguardando fechamento',s:'doing'},
+    {id:'pf3',title:'Iron House Diego',desc:'Prévia enviada — aguardando resposta',s:'doing'},
+    {id:'pf4',title:'Case salão de beleza',desc:'Não criado ainda',s:'nope'},
+    {id:'pf5',title:'Case pet shop',desc:'Não criado ainda',s:'nope'},
+    {id:'pf6',title:'Depoimentos reais',desc:'Aguardando primeiros clientes',s:'nope'},
+  ]},
+  {id:'prospeccao',ico:'📱',title:'Prospecção & Vendas',items:[
+    {id:'pr1',title:'Lista de 152 leads',desc:'Google Maps via Apify',s:'ok'},
+    {id:'pr2',title:'Script Matador 7 fases',desc:'Completo e pronto',s:'ok'},
+    {id:'pr3',title:'153 mensagens personalizadas',desc:'PDF gerado',s:'ok'},
+    {id:'pr4',title:'Planilha de controle',desc:'Excel com dashboard e funil',s:'ok'},
+    {id:'pr5',title:'Disparador WhatsApp',desc:'Ferramenta semi-automática criada',s:'ok'},
+    {id:'pr6',title:'Rotina diária 255 msgs',desc:'Em execução',s:'doing'},
+    {id:'pr7',title:'Follow-up sistemático',desc:'Processo estruturado',s:'nope'},
+    {id:'pr8',title:'Script Instagram DM',desc:'Não adaptado ainda',s:'nope'},
+  ]},
+  {id:'servicos',ico:'⚙️',title:'Serviços & Entrega',items:[
+    {id:'s1',title:'Sites estáticos HTML',desc:'Domina — entregou Iron House',s:'ok'},
+    {id:'s2',title:'Template base',desc:'Criado para negócios locais',s:'ok'},
+    {id:'s3',title:'SEO on-page',desc:'Meta tags, título, descrição',s:'nope'},
+    {id:'s4',title:'Google Meu Negócio',desc:'Sabe configurar o básico',s:'doing'},
+    {id:'s5',title:'Automação WhatsApp',desc:'n8n + Z-API — planejado',s:'future'},
+    {id:'s6',title:'Gestão de tráfego',desc:'Google/Meta Ads — aprendendo',s:'doing'},
+    {id:'s7',title:'Processo de entrega',desc:'Onboarding → aprovação → entrega',s:'nope'},
+    {id:'s8',title:'Contrato/proposta formal',desc:'Documento para clientes',s:'nope'},
+  ]},
+  {id:'financeiro',ico:'💰',title:'Financeiro & Precificação',items:[
+    {id:'f1',title:'Pacote Essencial R$797',desc:'Definido',s:'ok'},
+    {id:'f2',title:'Pacote Profissional R$1.097',desc:'Definido',s:'ok'},
+    {id:'f3',title:'Pacote Completo R$1.397',desc:'Definido',s:'ok'},
+    {id:'f4',title:'50% entrada + 50% entrega',desc:'Política definida',s:'ok'},
+    {id:'f5',title:'Recibo/NF para clientes',desc:'Não criado',s:'nope'},
+    {id:'f6',title:'Módulo financeiro',desc:'Controle de receitas e despesas',s:'ok'},
+    {id:'f7',title:'PIX/conta bancária',desc:'Para receber pagamentos',s:'nope'},
+    {id:'f8',title:'Meta R$2.000/mês',desc:'Em progresso',s:'doing'},
+  ]},
+  {id:'operacional',ico:'🔧',title:'Operacional & Ferramentas',items:[
+    {id:'o1',title:'Apify',desc:'Extrator de leads Google Maps',s:'ok'},
+    {id:'o2',title:'Vercel',desc:'Hospedagem dos sites',s:'ok'},
+    {id:'o3',title:'GitHub',desc:'Controle de versão',s:'ok'},
+    {id:'o4',title:'Claude Code',desc:'Desenvolvimento dos sites',s:'ok'},
+    {id:'o5',title:'Manus / v0.dev',desc:'Geração de UI',s:'ok'},
+    {id:'o6',title:'Framer',desc:'Para demos rápidas',s:'nope'},
+    {id:'o7',title:'CRM de clientes',desc:'Organização pós-venda',s:'nope'},
+  ]},
+  {id:'crescimento',ico:'📈',title:'Crescimento & Futuro',items:[
+    {id:'c1',title:'Agente WhatsApp IA',desc:'n8n + Z-API ~R$100/mês',s:'future'},
+    {id:'c2',title:'Expansão nichos',desc:'Restaurantes, clínicas, metalúrgicas',s:'future'},
+    {id:'c3',title:'Programa de indicações',desc:'Clientes indicando outros',s:'future'},
+    {id:'c4',title:'Equipe/parceiros',desc:'Outros devs para escalar',s:'future'},
+    {id:'c5',title:'LinkedIn',desc:'Para atrair clientes maiores',s:'future'},
+  ]},
+];
+
+const finDefault=[
+  {id:'t0',tipo:'saida',desc:'Claude Pro',cat:'Assinatura',val:20,data:'2026-03-01',st:'pago',cli:''},
+  {id:'t1',tipo:'saida',desc:'Apify plano',cat:'Ferramentas',val:0,data:'2026-03-01',st:'pago',cli:''},
+];
+
+function getD(){try{const s=localStorage.getItem(DK);return s?JSON.parse(s):dadosDefault}catch{return dadosDefault}}
+function saveD(d){localStorage.setItem(DK,JSON.stringify(d))}
+function getF(){try{const s=localStorage.getItem(FK);return s?JSON.parse(s):finDefault}catch{return finDefault}}
+function saveF(d){localStorage.setItem(FK,JSON.stringify(d))}
+
+let dados=getD(), fin=getF();
+
+const SL={ok:'Feito',doing:'Em andamento',nope:'Faltando',future:'Futuro'};
+const DC={ok:'d-ok',doing:'d-doing',nope:'d-nope',future:'d-future'};
+const BC={ok:'b-ok',doing:'b-doing',nope:'b-nope',future:'b-future'};
+const fmt=v=>'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+function calcFin(){
+  const rec=fin.filter(t=>t.tipo==='entrada'&&t.st==='recebido').reduce((a,t)=>a+Number(t.val),0);
+  const pend=fin.filter(t=>t.tipo==='entrada'&&t.st==='pendente').reduce((a,t)=>a+Number(t.val),0);
+  const sai=fin.filter(t=>t.tipo==='saida').reduce((a,t)=>a+Number(t.val),0);
+  const clis=new Set(fin.filter(t=>t.tipo==='entrada'&&t.st==='recebido'&&t.cli).map(t=>t.cli)).size;
+  return{rec,pend,sai,lucro:rec-sai,clis};
+}
+
+function calcMapa(){
+  let ok=0,doing=0,nope=0,future=0,total=0;
+  dados.forEach(c=>c.items.forEach(i=>{total++;if(i.s==='ok')ok++;else if(i.s==='doing')doing++;else if(i.s==='nope')nope++;else future++;}));
+  return{ok,doing,nope,future,total};
+}
+
+function kpiHtml(label,val,cls,sub){
+  return`<div class="kpi"><div class="k-label">${label}</div><div class="k-val ${cls}">${val}</div><div class="k-sub">${sub}</div></div>`;
+}
+
+function metaHtml(rec){
+  const meta=2000,pct=Math.min(100,Math.round(rec/meta*100));
+  return`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:.85rem"><strong>Meta mensal: R$ 2.000</strong><span style="color:var(--gray)">${fmt(rec)} / R$ 2.000 — ${pct}%</span></div><div class="meta-bar"><div class="meta-fill" style="width:${pct}%"></div></div>`;
+}
+
+function renderDash(){
+  const f=calcFin(), m=calcMapa();
+  document.getElementById('dash-date').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  document.getElementById('dash-kpis').innerHTML=
+    kpiHtml('Receita recebida',fmt(f.rec),'kv-green','confirmado')+
+    kpiHtml('A receber',fmt(f.pend),'kv-amber','pendente')+
+    kpiHtml('Despesas',fmt(f.sai),'kv-red','total gasto')+
+    kpiHtml('Lucro líquido',fmt(f.lucro),f.lucro>=0?'kv-green':'kv-red',f.lucro>=0?'positivo':'negativo')+
+    kpiHtml('Clientes',f.clis,'kv-purple','pagos');
+
+  document.getElementById('dash-meta').innerHTML=metaHtml(f.rec);
+
+  document.getElementById('dash-mapa').innerHTML=
+    kpiHtml('Feito',m.ok,'kv-green',Math.round(m.ok/m.total*100)+'% completo')+
+    kpiHtml('Em andamento',m.doing,'kv-amber','em progresso')+
+    kpiHtml('Faltando',m.nope,'kv-red','para fazer')+
+    kpiHtml('Futuro',m.future,'kv-purple','planejado');
+
+  const ult=fin.slice().reverse().slice(0,5);
+  document.getElementById('dash-tx').innerHTML=ult.map(t=>`
+    <tr>
+      <td style="color:var(--gray);white-space:nowrap">${t.data}</td>
+      <td>${t.desc}${t.cli?` <span style="color:var(--gray)">— ${t.cli}</span>`:''}</td>
+      <td><span class="tag ${t.tipo==='entrada'?(t.st==='pendente'?'t-pend':'t-in'):'t-out'}">${t.tipo==='entrada'?(t.st==='pendente'?'Pendente':'Entrada'):'Saída'}</span></td>
+      <td style="font-weight:600;color:${t.tipo==='entrada'?'var(--green)':'var(--red)'};white-space:nowrap">${t.tipo==='entrada'?'+':'-'}${fmt(t.val)}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--gray);padding:16px">Nenhuma transação ainda</td></tr>';
+
+  renderChartReceita(); renderChartGastos();
+}
+
+function renderFinPage(){
+  const f=calcFin();
+  document.getElementById('fin-kpis').innerHTML=
+    kpiHtml('Receita recebida',fmt(f.rec),'kv-green',fin.filter(t=>t.tipo==='entrada'&&t.st==='recebido').length+' transações')+
+    kpiHtml('A receber',fmt(f.pend),'kv-amber','pendente')+
+    kpiHtml('Total despesas',fmt(f.sai),'kv-red',fin.filter(t=>t.tipo==='saida').length+' pagamentos')+
+    kpiHtml('Lucro líquido',fmt(f.lucro),f.lucro>=0?'kv-green':'kv-red',f.lucro>=0?'✓ positivo':'✗ negativo')+
+    kpiHtml('Ticket médio',f.clis?fmt(f.rec/f.clis):fmt(0),'kv-blue','por cliente');
+  document.getElementById('fin-meta').innerHTML=metaHtml(f.rec);
+  renderTx(); renderChartMensal(); renderChartCats();
+}
+
+function renderTx(){
+  const tipo=document.getElementById('f-tipo').value;
+  const mes=document.getElementById('f-mes').value;
+  let lista=fin.slice().reverse();
+  if(tipo) lista=lista.filter(t=>t.tipo===tipo);
+  if(mes) lista=lista.filter(t=>t.data.includes(mes));
+  document.getElementById('fin-tx').innerHTML=lista.map(t=>`
+    <tr>
+      <td style="color:var(--gray);white-space:nowrap">${t.data}</td>
+      <td>${t.desc}</td>
+      <td style="color:var(--gray)">${t.cat}</td>
+      <td style="color:var(--gray)">${t.cli||'—'}</td>
+      <td><span class="tag ${t.tipo==='entrada'?(t.st==='pendente'?'t-pend':'t-in'):'t-out'}">${t.tipo==='entrada'?(t.st==='pendente'?'Pendente':'Entrada'):'Saída'}</span></td>
+      <td style="font-weight:600;color:${t.tipo==='entrada'?'var(--green)':'var(--red)'};white-space:nowrap">${t.tipo==='entrada'?'+':'-'}${fmt(t.val)}</td>
+      <td><button class="it-btn" onclick="rmTx('${t.id}')" style="color:var(--red)">✕</button></td>
+    </tr>
+  `).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:16px">Nenhuma transação</td></tr>';
+}
+
+function rmTx(id){if(!confirm('Remover?'))return;fin=fin.filter(t=>t.id!==id);saveF(fin);renderFinPage();renderDash();}
+
+function chartDef(type,labels,datasets,opts){return{type,data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#666',boxWidth:11,font:{size:11}}}},scales:type==='bar'?{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555'}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555',...opts}}}:undefined}}}
+
+function destroyChart(k){if(charts[k]){charts[k].destroy();delete charts[k]}}
+
+function renderChartReceita(){
+  const el=document.getElementById('c-receita');if(!el)return;destroyChart('receita');
+  const meses=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const vals=meses.map((_,i)=>{const m=String(i+1).padStart(2,'0');return fin.filter(t=>t.tipo==='entrada'&&t.st==='recebido'&&t.data.includes('-'+m+'-')).reduce((a,t)=>a+Number(t.val),0)});
+  charts.receita=new Chart(el,chartDef('bar',meses,[{label:'Receita',data:vals,backgroundColor:'rgba(34,197,94,.35)',borderColor:'#22c55e',borderWidth:2,borderRadius:5}],{callback:v=>'R$'+v}));
+}
+
+function renderChartGastos(){
+  const el=document.getElementById('c-gastos');if(!el)return;destroyChart('gastos');
+  const cats={};fin.filter(t=>t.tipo==='saida').forEach(t=>{cats[t.cat]=(cats[t.cat]||0)+Number(t.val)});
+  const labels=Object.keys(cats)||['Sem dados'];
+  const vals=Object.values(cats)||[0];
+  if(!labels.length){labels.push('Sem despesas');vals.push(1)}
+  charts.gastos=new Chart(el,{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:['rgba(239,68,68,.6)','rgba(245,158,11,.6)','rgba(59,130,246,.6)','rgba(139,92,246,.6)','rgba(34,197,94,.6)','rgba(20,184,166,.6)'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#666',boxWidth:11,font:{size:11}}}}}});
+}
+
+function renderChartMensal(){
+  const el=document.getElementById('c-mensal');if(!el)return;destroyChart('mensal');
+  const meses=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const r=meses.map((_,i)=>{const m=String(i+1).padStart(2,'0');return fin.filter(t=>t.tipo==='entrada'&&t.st==='recebido'&&t.data.includes('-'+m+'-')).reduce((a,t)=>a+Number(t.val),0)});
+  const s=meses.map((_,i)=>{const m=String(i+1).padStart(2,'0');return fin.filter(t=>t.tipo==='saida'&&t.data.includes('-'+m+'-')).reduce((a,t)=>a+Number(t.val),0)});
+  charts.mensal=new Chart(el,chartDef('bar',meses,[{label:'Receita',data:r,backgroundColor:'rgba(34,197,94,.35)',borderColor:'#22c55e',borderWidth:2,borderRadius:5},{label:'Despesa',data:s,backgroundColor:'rgba(239,68,68,.35)',borderColor:'#ef4444',borderWidth:2,borderRadius:5}],{callback:v=>'R$'+v}));
+}
+
+function renderChartCats(){
+  const el=document.getElementById('c-cats');if(!el)return;destroyChart('cats');
+  const cats={};fin.filter(t=>t.tipo==='saida').forEach(t=>{cats[t.cat]=(cats[t.cat]||0)+Number(t.val)});
+  const labels=Object.keys(cats);const vals=Object.values(cats);
+  if(!labels.length){labels.push('Sem despesas');vals.push(0)}
+  charts.cats=new Chart(el,{type:'pie',data:{labels,datasets:[{data:vals,backgroundColor:['rgba(239,68,68,.6)','rgba(245,158,11,.6)','rgba(59,130,246,.6)','rgba(139,92,246,.6)','rgba(34,197,94,.6)','rgba(20,184,166,.6)'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#666',boxWidth:11,font:{size:11}}}}}});
+}
+
+function renderMapa(){
+  const m=calcMapa();
+  document.getElementById('mapa-kpis').innerHTML=
+    kpiHtml('Feito',m.ok,'kv-green',Math.round(m.ok/m.total*100)+'% do total')+
+    kpiHtml('Em andamento',m.doing,'kv-amber','em progresso')+
+    kpiHtml('Faltando',m.nope,'kv-red','para fazer')+
+    kpiHtml('Futuro',m.future,'kv-purple','planejado');
+  const wrap=document.getElementById('cats-wrap');wrap.innerHTML='';
+  dados.forEach(cat=>{
+    const ok=cat.items.filter(i=>i.s==='ok').length;
+    const pct=Math.round(ok/cat.items.length*100);
+    const el=document.createElement('div');el.className='cat-card';el.id='cat-'+cat.id;
+    el.innerHTML=`
+      <div class="cat-head" onclick="togCat('${cat.id}')">
+        <div class="cat-ico">${cat.ico}</div>
+        <div class="cat-inf">
+          <div class="cat-title">${cat.title}</div>
+          <div class="cat-prog"><div class="cat-bar"><div class="cat-fill" style="width:${pct}%"></div></div><div class="cat-pct">${ok}/${cat.items.length} · ${pct}%</div></div>
+        </div>
+        <span class="cat-arr" id="arr-${cat.id}">▼</span>
+      </div>
+      <div class="cat-body" id="body-${cat.id}">
+        <div class="items-grid">
+          ${cat.items.map(it=>`
+            <div class="it">
+              <div class="it-dot ${DC[it.s]}"></div>
+              <div class="it-body">
+                <div class="it-title">${it.title}</div>
+                <div class="it-desc">${it.desc}</div>
+                <span class="it-badge ${BC[it.s]}">${SL[it.s]}</span>
+                <div class="it-acts">
+                  ${it.s!=='ok'?`<button class="it-btn" onclick="chSt('${cat.id}','${it.id}','ok')">✓ Feito</button>`:''}
+                  ${it.s!=='doing'?`<button class="it-btn" onclick="chSt('${cat.id}','${it.id}','doing')">→ Iniciar</button>`:''}
+                  <button class="it-btn" onclick="rmIt('${cat.id}','${it.id}')" style="color:var(--red)">✕</button>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <button class="btn btn-ghost" style="margin-top:10px;font-size:.78rem;padding:5px 11px" onclick="openItemCat('${cat.id}')">+ Adicionar</button>
+      </div>
+    `;
+    wrap.appendChild(el);
+  });
+}
+
+function togCat(id){
+  const b=document.getElementById('body-'+id);const a=document.getElementById('arr-'+id);
+  const op=b.classList.contains('open');b.classList.toggle('open');a.classList.toggle('open',!op);
+}
+
+function toggleAll(){
+  allOpen=!allOpen;
+  dados.forEach(c=>{
+    const b=document.getElementById('body-'+c.id);const a=document.getElementById('arr-'+c.id);
+    if(b){b.classList.toggle('open',allOpen);if(a)a.classList.toggle('open',allOpen);}
+  });
+}
+
+function chSt(cId,iId,s){
+  const c=dados.find(x=>x.id===cId);if(!c)return;
+  const it=c.items.find(x=>x.id===iId);if(!it)return;
+  it.s=s;saveD(dados);renderMapa();renderDash();
+}
+
+function rmIt(cId,iId){
+  if(!confirm('Remover?'))return;
+  const c=dados.find(x=>x.id===cId);if(!c)return;
+  c.items=c.items.filter(x=>x.id!==iId);saveD(dados);renderMapa();renderDash();
+}
+
+function goPage(p){
+  document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(e=>e.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.getElementById('nav-'+p)?.classList.add('active');
+  if(p==='dashboard'){renderDash()}
+  if(p==='financeiro'){renderFinPage()}
+  if(p==='mapa'){renderMapa()}
+}
+
+function goScroll(id){
+  goPage('mapa');
+  setTimeout(()=>{
+    const el=document.getElementById('cat-'+id);
+    if(el){if(!document.getElementById('body-'+id).classList.contains('open'))togCat(id);el.scrollIntoView({behavior:'smooth',block:'start'});}
+  },80);
+}
+
+// MODALS
+function openFin(tipo){
+  finTipo=tipo;
+  document.getElementById('mo-fin-title').textContent=tipo==='entrada'?'Nova Receita':'Nova Despesa';
+  document.getElementById('fin-status-wrap').style.display=tipo==='entrada'?'block':'none';
+  document.getElementById('fin-data').value=new Date().toISOString().split('T')[0];
+  ['fin-desc','fin-val','fin-cliente'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mo-fin').classList.add('open');
+}
+
+function openItem(){populateCats();document.getElementById('mo-item').classList.add('open')}
+function openItemCat(catId){populateCats();document.getElementById('item-cat').value=catId;document.getElementById('mo-item').classList.add('open')}
+function closeMo(id){document.getElementById('mo-'+id).classList.remove('open')}
+
+function populateCats(){
+  document.getElementById('item-cat').innerHTML=dados.map(c=>`<option value="${c.id}">${c.ico} ${c.title}</option>`).join('');
+}
+
+function saveFin(){
+  const desc=document.getElementById('fin-desc').value.trim();
+  const val=parseFloat(document.getElementById('fin-val').value);
+  const data=document.getElementById('fin-data').value;
+  const cat=document.getElementById('fin-cat').value;
+  const st=finTipo==='entrada'?document.getElementById('fin-status').value:'pago';
+  const cli=document.getElementById('fin-cliente').value.trim();
+  if(!desc||!val||!data){alert('Preencha descrição, valor e data');return}
+  fin.push({id:'t'+Date.now(),tipo:finTipo,desc,cat,val,data,st,cli});
+  saveF(fin);renderFinPage();renderDash();closeMo('fin');
+}
+
+function saveItem(){
+  const catId=document.getElementById('item-cat').value;
+  const title=document.getElementById('item-title').value.trim();
+  const desc=document.getElementById('item-desc').value.trim();
+  const s=document.getElementById('item-status').value;
+  if(!title){alert('Digite um título');return}
+  const cat=dados.find(c=>c.id===catId);if(!cat)return;
+  cat.items.push({id:'u'+Date.now(),title,desc,s});
+  saveD(dados);renderMapa();renderDash();closeMo('item');
+  document.getElementById('item-title').value='';document.getElementById('item-desc').value='';
+}
+
+function exportar(){
+  const b=new Blob([JSON.stringify({mapa:dados,financeiro:fin},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='sipos-backup.json';a.click();
+}
+
+// AI
+const CTX=`Você é assistente pessoal do Eduardo Spínola, dono da Sipos Studio — criação de sites para pequenos negócios locais no Brasil. Pacotes: R$797/R$1.097/R$1.397. Meta: R$2k/mês. Em negociação: Iron House Canaã e Diego Panizza. Outros serviços: Google Meu Negócio R$297, Automação WhatsApp R$497+R$97/mês, Tráfego R$597/mês. Seja direto, prático, em pt-BR.`;
+let chatH=[];
+
+async function sendAI(){
+  const inp=document.getElementById('ai-inp');const msg=inp.value.trim();if(!msg)return;
+  inp.value='';addMsg(msg,'user');chatH.push({role:'user',content:msg});
+  const load=addLoad();
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:CTX,messages:chatH.slice(-10)})});
+    const data=await res.json();load.remove();
+    const reply=data.content?.[0]?.text||'Erro.';
+    addMsg(reply,'ai');chatH.push({role:'assistant',content:reply});
+  }catch{load.remove();addMsg('Erro de conexão.','ai')}
+}
+
+function addMsg(text,who){
+  const m=document.getElementById('ai-msgs');
+  const d=document.createElement('div');d.className=`msg msg-${who}`;d.textContent=text;
+  m.appendChild(d);m.scrollTop=m.scrollHeight;return d;
+}
+
+function addLoad(){
+  const m=document.getElementById('ai-msgs');
+  const d=document.createElement('div');d.className='msg msg-ai msg-load';
+  d.innerHTML='<span></span><span></span><span></span>';
+  m.appendChild(d);m.scrollTop=m.scrollHeight;return d;
+}
+
+function qMsg(msg){document.getElementById('ai-inp').value=msg;sendAI()}
+function aiKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendAI()}}
+
+renderDash();
+</script>
+</body>
+</html>
