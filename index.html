@@ -1183,7 +1183,8 @@ async function sendAI(){
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:AI_SYSTEM,messages:chatH.slice(-12)})
     });
     const d=await res.json();load.remove();
-    const reply=d.content?.[0]?.text||'Erro.';
+    if(d.error){addMsg('Erro da API: '+JSON.stringify(d.error),'ai');return;}
+    const reply=d.content?.[0]?.text||'Sem resposta da API. Verifique a chave no Vercel.';
     const actionMatch=reply.match(/<action>([\s\S]*?)<\/action>/);
     const cleanReply=reply.replace(/<action>[\s\S]*?<\/action>/g,'').trim();
     addMsg(cleanReply,'ai');
