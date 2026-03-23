@@ -1,7 +1,7 @@
 {
-  "name": "Sipos Studio",
-  "short_name": "Sipos Studio",
-  "description": "Command Center da Sipos Studio",
+  "name": "SLAC — Sano Lab",
+  "short_name": "SLAC",
+  "description": "Sano Lab Advanced CRM",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -12,7 +12,8 @@
     {
       "src": "/icons/favicon-96x96.png",
       "sizes": "96x96",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icons/web-app-manifest-192x192.png",
