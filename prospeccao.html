@@ -135,18 +135,15 @@ tbody td{padding:11px 14px;vertical-align:middle}
 .progress-fill{height:100%;background:var(--g);border-radius:999px;transition:width .3s}
 /* Indicador de progresso diário */
 .daily-goal{background:#111;border-bottom:1px solid var(--brd);padding:14px 20px;display:none}
-.daily-goal-inner{max-width:680px}
-.daily-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px;flex-wrap:wrap}
-.daily-label{font-size:.82rem;font-weight:600;color:#f0f0f0}
+.daily-goal-inner{max-width:780px}
+.daily-top{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.dg-block{display:flex;flex-direction:column;justify-content:center}
+.dg-sep{width:1px;height:48px;background:var(--brd);flex-shrink:0}
 .daily-count{font-size:1.5rem;font-weight:800;line-height:1}
 .daily-count .n-atual{color:var(--g)}
 .daily-count .n-sep{color:#333;margin:0 4px}
 .daily-count .n-meta{color:#f0f0f0}
-.daily-meta{color:#555;font-size:.72rem;margin-top:2px}
-.daily-edit{display:flex;align-items:center;gap:6px}
-.daily-edit input{width:64px;padding:5px 8px;background:#0d0d0d;border:1px solid var(--brd);border-radius:6px;color:#f0f0f0;font-family:'Inter',sans-serif;font-size:.82rem;outline:none;text-align:center;transition:border-color .2s}
-.daily-edit input:focus{border-color:rgba(34,197,94,.4)}
-.daily-edit label{font-size:.75rem;color:var(--gr);white-space:nowrap}
+.daily-meta{font-size:.72rem;color:var(--gr);margin-top:3px}
 .daily-bar-wrap{background:rgba(255,255,255,.05);border-radius:999px;height:8px;overflow:hidden;position:relative}
 .daily-bar-fill{height:100%;border-radius:999px;transition:width .5s cubic-bezier(.22,1,.36,1);background:linear-gradient(90deg,#16a34a,#22c55e)}
 .daily-bar-fill.done{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
@@ -154,6 +151,56 @@ tbody td{padding:11px 14px;vertical-align:middle}
 .daily-msg{font-size:.75rem;color:var(--gr);margin-top:6px;min-height:1em;transition:color .3s}
 .daily-msg.win{color:var(--g);font-weight:600}
 .daily-msg.fire{color:#f59e0b;font-weight:600}
+
+/* Seleção múltipla */
+.row-check{width:16px;height:16px;accent-color:var(--g);cursor:pointer;flex-shrink:0}
+.sel-bar{display:none;align-items:center;gap:10px;padding:10px 20px;background:rgba(34,197,94,.06);border-bottom:1px solid rgba(34,197,94,.2);flex-wrap:wrap}
+.sel-bar.show{display:flex}
+.sel-count{font-size:.82rem;font-weight:600;color:var(--g)}
+
+/* Modo foco */
+.foco-overlay{position:fixed;inset:0;background:#0a0a0a;z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.foco-overlay.open{display:flex}
+.foco-card{background:#111;border:1px solid var(--brd);border-radius:20px;padding:40px 36px;max-width:440px;width:100%;text-align:center;position:relative}
+.foco-close{position:absolute;top:14px;right:16px;background:transparent;border:none;color:var(--gr);cursor:pointer;font-size:1.1rem;font-family:'Inter',sans-serif;padding:4px}
+.foco-close:hover{color:#f0f0f0}
+.foco-counter{font-size:.75rem;color:var(--gr);margin-bottom:20px;text-transform:uppercase;letter-spacing:.1em}
+.foco-nome{font-size:1.6rem;font-weight:800;margin-bottom:8px;letter-spacing:-.02em;cursor:pointer;transition:color .2s}
+.foco-nome:hover{color:var(--g)}
+.foco-cat{font-size:.82rem;color:var(--gr);margin-bottom:4px}
+.foco-cidade{font-size:.78rem;color:#444;margin-bottom:28px}
+.foco-tel{font-size:1.1rem;font-weight:700;color:#f0f0f0;cursor:pointer;display:inline-flex;align-items:center;gap:8px;margin-bottom:28px;padding:10px 20px;border-radius:10px;border:1px solid var(--brd);transition:all .2s}
+.foco-tel:hover{border-color:rgba(34,197,94,.4);color:var(--g)}
+.foco-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.foco-nav{display:flex;align-items:center;justify-content:space-between;margin-top:24px;gap:12px}
+.foco-nav-btn{padding:8px 16px;border-radius:7px;border:1px solid var(--brd);background:transparent;color:var(--gr2);font-family:'Inter',sans-serif;font-size:.8rem;cursor:pointer;transition:all .2s}
+.foco-nav-btn:hover{border-color:rgba(255,255,255,.2);color:#f0f0f0}
+.foco-pular{background:transparent;border:1px solid rgba(239,68,68,.2);color:rgba(239,68,68,.6);padding:8px 16px;border-radius:7px;font-family:'Inter',sans-serif;font-size:.8rem;cursor:pointer;transition:all .2s}
+.foco-pular:hover{background:rgba(239,68,68,.08);color:var(--red)}
+
+/* Modal histórico */
+.hist-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:600;display:none;align-items:center;justify-content:center;padding:20px}
+.hist-overlay.open{display:flex}
+.hist-box{background:#111;border:1px solid var(--brd);border-radius:16px;padding:28px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto;position:relative}
+.hist-close{position:absolute;top:12px;right:14px;background:transparent;border:none;color:var(--gr);cursor:pointer;font-size:1rem;font-family:'Inter',sans-serif}
+.hist-item-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.hist-item-row:last-child{border-bottom:none}
+.hist-dot{width:8px;height:8px;border-radius:50%;background:var(--g);flex-shrink:0;margin-top:5px}
+.hist-info{flex:1}
+.hist-label{font-size:.85rem;font-weight:600;color:#f0f0f0}
+.hist-ts{font-size:.72rem;color:var(--gr);margin-top:2px}
+
+/* Métricas de conversão */
+.metricas-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px 20px;border-bottom:1px solid var(--brd);background:#0d0d0d;display:none}
+.met-card{background:#111;border:1px solid var(--brd);border-radius:8px;padding:12px;text-align:center}
+.met-n{font-size:1.4rem;font-weight:800;line-height:1;margin-bottom:4px}
+.met-l{font-size:.68rem;color:var(--gr);text-transform:uppercase;letter-spacing:.06em}
+.met-pct{font-size:.72rem;color:var(--g);margin-top:2px}
+
+/* Alerta follow-up */
+.fu-alert{background:rgba(245,158,11,.06);border-left:3px solid #f59e0b;border-radius:0 8px 8px 0;padding:8px 14px;margin:0 20px 8px;font-size:.8rem;color:#fbbf24;display:none;align-items:center;gap:8px;cursor:pointer}
+.fu-alert.show{display:flex}
+.fu-alert:hover{background:rgba(245,158,11,.1)}
 
 @media(max-width:640px){
   .topbar{padding:10px 12px}
@@ -198,24 +245,52 @@ tbody td{padding:11px 14px;vertical-align:middle}
   <div class="stat"><div class="stat-n" id="s-sem" style="color:#f87171">0</div><div class="stat-l">Sem site</div></div>
 </div>
 
-<!-- PROGRESS -->
-<!-- INDICADOR DIÁRIO -->
+<!-- INDICADOR DE PROGRESSO -->
 <div class="daily-goal" id="daily-goal">
   <div class="daily-goal-inner">
     <div class="daily-top">
-      <div>
+
+      <!-- Contagem total acumulada -->
+      <div class="dg-block">
         <div class="daily-count">
-          <span class="n-atual" id="dg-atual">0</span><span class="n-sep">/</span><span class="n-meta" id="dg-meta-lbl">50</span>
-          <span style="font-size:.78rem;font-weight:500;color:var(--gr);margin-left:8px">contatos feitos hoje</span>
+          <span class="n-atual" id="dg-atual">0</span>
+          <span class="n-sep">/</span>
+          <span class="n-meta" id="dg-meta-lbl">50</span>
         </div>
-        <div class="daily-meta" id="dg-date"></div>
+        <div class="daily-meta">contatos totais da lista</div>
       </div>
-      <div class="daily-edit">
-        <label for="dg-input">Meta do dia:</label>
-        <input type="number" id="dg-input" min="1" max="500" value="50" onchange="salvarMeta()" oninput="salvarMeta()"/>
+
+      <!-- Separador -->
+      <div class="dg-sep"></div>
+
+      <!-- Meta diária editável -->
+      <div class="dg-block">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div>
+            <div style="font-size:.72rem;color:var(--gr);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Meta diária</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <input type="number" id="dg-input" min="1" max="500" value="50"
+                onchange="salvarMeta()" oninput="salvarMeta()"
+                style="width:64px;padding:5px 8px;background:#0d0d0d;border:1px solid var(--brd);border-radius:6px;color:#f0f0f0;font-family:'Inter',sans-serif;font-size:.95rem;font-weight:700;outline:none;text-align:center;transition:border-color .2s"
+                onfocus="this.style.borderColor='rgba(34,197,94,.5)'" onblur="this.style.borderColor='var(--brd)'"/>
+              <span style="font-size:.78rem;color:var(--gr)">por dia</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:.72rem;color:var(--gr);margin-top:4px" id="dg-media-txt"></div>
       </div>
+
+      <!-- Média real -->
+      <div class="dg-block" id="dg-media-block">
+        <div style="font-size:.72rem;color:var(--gr);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Média real</div>
+        <div style="font-size:1.4rem;font-weight:800;color:var(--g)" id="dg-media-n">—</div>
+        <div style="font-size:.72rem;color:var(--gr);margin-top:2px">contatos/dia</div>
+      </div>
+
     </div>
-    <div class="daily-bar-wrap">
+
+    <!-- Barra de progresso relativa à meta total da lista -->
+    <div class="daily-bar-wrap" style="margin-top:12px">
       <div class="daily-bar-fill" id="dg-fill" style="width:0%"></div>
     </div>
     <div class="daily-msg" id="dg-msg">Bora! Cada contato é uma oportunidade.</div>
@@ -241,6 +316,10 @@ tbody td{padding:11px 14px;vertical-align:middle}
   <select class="filter-select" id="filter-cat" onchange="applyFilters()">
     <option value="">Todas as categorias</option>
   </select>
+  <button class="btn btn-gh" id="btn-foco" onclick="abrirFoco()" style="white-space:nowrap">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+    Modo Foco
+  </button>
   <select class="filter-select" id="filter-cidade" onchange="applyFilters()">
     <option value="">Todas as cidades</option>
   </select>
@@ -268,11 +347,40 @@ tbody td{padding:11px 14px;vertical-align:middle}
 </div>
 
 <!-- TABELA -->
+<!-- ALERTA FOLLOW-UP -->
+<div class="fu-alert" id="fu-alert" onclick="document.getElementById('filter-status').value='pendente';applyFilters()">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+  <span id="fu-alert-txt"></span>
+</div>
+
+<!-- MÉTRICAS DE CONVERSÃO -->
+<div class="metricas-grid" id="metricas-grid">
+  <div class="met-card"><div class="met-n" id="m-total" style="color:var(--gr2)">0</div><div class="met-l">Contatados</div></div>
+  <div class="met-card"><div class="met-n" id="m-resp" style="color:#60a5fa">0</div><div class="met-l">Respostas</div><div class="met-pct" id="m-resp-pct"></div></div>
+  <div class="met-card"><div class="met-n" id="m-demo" style="color:#c084fc">0</div><div class="met-l">Demos</div><div class="met-pct" id="m-demo-pct"></div></div>
+  <div class="met-card"><div class="met-n" id="m-fech" style="color:var(--g)">0</div><div class="met-l">Fechamentos</div><div class="met-pct" id="m-fech-pct"></div></div>
+</div>
+
+<!-- BARRA DE SELEÇÃO -->
+<div class="sel-bar" id="sel-bar">
+  <span class="sel-count" id="sel-count">0 selecionados</span>
+  <button class="btn btn-g" onclick="enviarSelecionadosKanban()" style="font-size:.78rem;padding:6px 12px">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+    Enviar ao Kanban
+  </button>
+  <button class="btn btn-red" onclick="excluirSelecionados()" style="font-size:.78rem;padding:6px 12px">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+    Excluir
+  </button>
+  <button class="btn btn-gh" onclick="limparSelecao()" style="font-size:.78rem;padding:6px 12px">Cancelar</button>
+</div>
+
 <div class="tbl-container" id="tbl-container" style="display:none">
   <div class="tbl-wrap">
     <table>
       <thead>
         <tr>
+          <th style="width:36px"><input type="checkbox" id="check-all" class="row-check" onchange="toggleAll(this.checked)" title="Selecionar todos"/></th>
           <th class="sortable" onclick="sortBy('nome')" id="th-nome">Empresa</th>
           <th class="sortable" onclick="sortBy('telefone')" id="th-telefone">Telefone</th>
           <th class="sortable" onclick="sortBy('categoria')" id="th-categoria">Categoria</th>
@@ -298,6 +406,43 @@ tbody td{padding:11px 14px;vertical-align:middle}
   <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
   <p>Nenhum resultado encontrado</p>
   <span>Tente ajustar os filtros</span>
+</div>
+
+<div style="text-align:center;padding:10px 20px;font-size:.68rem;color:#2a2a2a;border-top:1px solid var(--brd)">Desenvolvido por <strong style="color:#333">Sano Lab</strong></div>
+<!-- MODO FOCO -->
+<div class="foco-overlay" id="foco-overlay">
+  <div class="foco-card">
+    <button class="foco-close" onclick="fecharFoco()">✕</button>
+    <div class="foco-counter" id="foco-counter">1 / 0 pendentes</div>
+    <div class="foco-nome" id="foco-nome" onclick="copiarNomeFoco()" title="Clique para copiar">—</div>
+    <div class="foco-cat" id="foco-cat"></div>
+    <div class="foco-cidade" id="foco-cidade"></div>
+    <div class="foco-tel" onclick="copiarTelFoco()" id="foco-tel" title="Clique para copiar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81A2 2 0 0 1 9.36 8.5L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      <span id="foco-tel-txt">—</span>
+    </div>
+    <div class="foco-actions">
+      <a id="foco-wa-btn" href="#" target="_blank" class="btn btn-g" style="font-size:.85rem;padding:10px 20px;border-radius:9px;text-decoration:none">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Abrir WhatsApp
+      </a>
+      <button class="btn btn-g" id="foco-contato-btn" onclick="focoContatou()" style="font-size:.85rem;padding:10px 20px;border-radius:9px">📲 Contatei</button>
+    </div>
+    <div class="foco-nav">
+      <button class="foco-nav-btn" onclick="focoAnterior()">← Anterior</button>
+      <button class="foco-pular" onclick="focoPular()">Pular →</button>
+      <button class="foco-nav-btn" onclick="focoProximo()">Próximo →</button>
+    </div>
+  </div>
+</div>
+
+<!-- HISTÓRICO DO LEAD -->
+<div class="hist-overlay" id="hist-overlay">
+  <div class="hist-box">
+    <button class="hist-close" onclick="fecharHistorico()">✕</button>
+    <h3 style="font-size:1rem;font-weight:700;margin-bottom:16px" id="hist-titulo">Histórico</h3>
+    <div id="hist-content"></div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -585,8 +730,13 @@ function renderTabela() {
     const badgeLabel = contatado ? '✓ Contatado' : semSite ? 'Sem site' : 'Pendente';
     const telFmt = formatTel(r.telefone);
 
-    return `<tr class="${contatado ? 'contatado' : ''}" data-id="${r._id}">
-      <td><div class="td-nome" onclick="copiarNome('${escHtml(r.nome)}')" title="Clique para copiar">${escHtml(r.nome)}</div></td>
+    const selecionado = selectedIds.has(r._id);
+    return `<tr class="${contatado ? 'contatado' : ''} ${selecionado ? 'selected' : ''}" data-id="${r._id}">
+      <td><input type="checkbox" class="row-check" ${selecionado ? 'checked' : ''} onchange="toggleSelect('${r._id}',this.checked)"/></td>
+      <td>
+        <div class="td-nome" onclick="copiarNome('${escHtml(r.nome)}')" title="Clique para copiar">${escHtml(r.nome)}</div>
+        ${contatado && r._contatado_em ? `<div style="font-size:.67rem;color:var(--gr);margin-top:2px;cursor:pointer" onclick="abrirHistorico('${r._id}')">📋 ver histórico</div>` : ''}
+      </td>
       <td>
         <div class="td-num" onclick="copiarTel('${r.telefone}')" title="Clique para copiar">
           ${telFmt}
@@ -754,21 +904,27 @@ function updateProgress() {
 }
 
 // ── INDICADOR DIÁRIO ──
-const dgStorageKey = () => `dg_${new Date().toDateString()}`;
 const dgMetaKey = 'dg_meta';
+const dgStartKey = () => `dg_start_${currentUser?.id || 'local'}`;
 
-function getDailyCount() {
-  // Conta apenas contatos feitos HOJE
-  const hoje = new Date(); hoje.setHours(0,0,0,0);
-  return allRows.filter(r => {
-    if (r._status !== 'contatado' || !r._contatado_em) return false;
-    const d = new Date(r._contatado_em); d.setHours(0,0,0,0);
-    return d.getTime() === hoje.getTime();
-  }).length;
+function getTotalContatados() {
+  return allRows.filter(r => r._status === 'contatado').length;
 }
 
 function getDailyMeta() {
   return parseInt(localStorage.getItem(dgMetaKey) || '50', 10);
+}
+
+function getMediaReal() {
+  // Calcula média de contatos por dia desde o primeiro contato registrado
+  const contatados = allRows.filter(r => r._status === 'contatado' && r._contatado_em);
+  if (!contatados.length) return 0;
+  const datas = contatados.map(r => new Date(r._contatado_em));
+  const primeira = new Date(Math.min(...datas));
+  const hoje = new Date();
+  primeira.setHours(0,0,0,0); hoje.setHours(0,0,0,0);
+  const dias = Math.max(1, Math.round((hoje - primeira) / 86400000) + 1);
+  return Math.round(contatados.length / dias * 10) / 10;
 }
 
 function salvarMeta() {
@@ -779,43 +935,58 @@ function salvarMeta() {
 }
 
 function updateDailyGoal() {
-  const atual = getDailyCount();
+  const atual = getTotalContatados();
   const meta = getDailyMeta();
-  const pct = Math.min(100, Math.round(atual / meta * 100));
-  const over = atual > meta;
-  const done = atual >= meta;
+  const total = allRows.length;
+  const media = getMediaReal();
+  const pct = total ? Math.min(100, Math.round(atual / total * 100)) : 0;
+  const done = atual >= total && total > 0;
+  const faltam = total - atual;
 
+  // Contador principal: contatados / total da lista
   document.getElementById('dg-atual').textContent = atual;
-  document.getElementById('dg-meta-lbl').textContent = meta;
+  document.getElementById('dg-meta-lbl').textContent = total || meta;
+
+  // Input da meta diária
   document.getElementById('dg-input').value = meta;
 
-  const hoje = new Date();
-  document.getElementById('dg-date').textContent =
-    hoje.toLocaleDateString('pt-BR', {weekday:'long', day:'2-digit', month:'long'});
+  // Média real
+  const mediaEl = document.getElementById('dg-media-n');
+  if (mediaEl) mediaEl.textContent = media > 0 ? media : '—';
 
+  // Estimativa de dias para terminar a lista
+  const txtEl = document.getElementById('dg-media-txt');
+  if (txtEl && media > 0 && faltam > 0) {
+    const dias = Math.ceil(faltam / meta);
+    txtEl.textContent = `~${dias} dia${dias !== 1 ? 's' : ''} para terminar a lista`;
+  } else if (txtEl) {
+    txtEl.textContent = faltam <= 0 ? 'Lista completa! 🎉' : '';
+  }
+
+  // Barra
   const fill = document.getElementById('dg-fill');
   fill.style.width = pct + '%';
-  fill.className = 'daily-bar-fill' + (over ? ' over' : done ? ' done' : '');
+  fill.className = 'daily-bar-fill' + (done ? ' done' : pct >= 50 ? ' over' : '');
 
+  // Mensagem motivacional
   const msgEl = document.getElementById('dg-msg');
-  const faltam = meta - atual;
-  if (atual === 0) {
-    msgEl.textContent = 'Bora! Cada contato é uma oportunidade.';
+  if (total === 0) {
+    msgEl.textContent = 'Importe uma lista para começar.';
     msgEl.className = 'daily-msg';
-  } else if (atual < meta * 0.3) {
-    msgEl.textContent = `Bom começo! Faltam ${faltam} para bater a meta.`;
+  } else if (atual === 0) {
+    msgEl.textContent = `Bora! ${total} empresas esperando contato.`;
     msgEl.className = 'daily-msg';
-  } else if (atual < meta * 0.6) {
-    msgEl.textContent = `No caminho certo! ${faltam} contatos para a meta.`;
+  } else if (pct < 30) {
+    msgEl.textContent = `Bom começo! Faltam ${faltam} contatos para zerar a lista.`;
     msgEl.className = 'daily-msg';
-  } else if (atual < meta) {
-    msgEl.textContent = `Quase lá! Só mais ${faltam} contatos. 💪`;
+  } else if (pct < 60) {
+    msgEl.textContent = `No caminho certo! Mais da metade ficou para trás. 💪`;
     msgEl.className = 'daily-msg win';
-  } else if (atual === meta) {
-    msgEl.textContent = `🎯 Meta batida! ${atual} contatos hoje. Excelente!`;
-    msgEl.className = 'daily-msg fire';
+  } else if (pct < 100) {
+    msgEl.textContent = `Quase lá! Só ${faltam} empresa${faltam !== 1 ? 's' : ''} para contatar.`;
+    msgEl.className = 'daily-msg win';
   } else {
-    msgEl.textContent = `🔥 Meta superada! ${atual} contatos hoje — ${atual - meta} acima da meta!`;
+    msgEl.textContent = `🎯 Lista zerada! ${atual} empresas contatadas. Hora de importar mais.`;
     msgEl.className = 'daily-msg fire';
   }
 }
@@ -859,6 +1030,204 @@ function toast(msg, type = 'ok') {
 }
 
 // ── INIT ──
+// ── SELEÇÃO MÚLTIPLA ──
+let selectedIds = new Set();
+
+function toggleSelect(id, checked) {
+  checked ? selectedIds.add(id) : selectedIds.delete(id);
+  updateSelBar();
+  // Atualizar visual da linha
+  const tr = document.querySelector(`tr[data-id="${id}"]`);
+  if (tr) tr.classList.toggle('selected', checked);
+}
+
+function toggleAll(checked) {
+  const page = filtered.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+  page.forEach(r => { checked ? selectedIds.add(r._id) : selectedIds.delete(r._id); });
+  updateSelBar();
+  renderTabela();
+}
+
+function updateSelBar() {
+  const bar = document.getElementById('sel-bar');
+  const count = document.getElementById('sel-count');
+  bar.classList.toggle('show', selectedIds.size > 0);
+  count.textContent = `${selectedIds.size} selecionado${selectedIds.size !== 1 ? 's' : ''}`;
+}
+
+function limparSelecao() {
+  selectedIds.clear();
+  updateSelBar();
+  document.getElementById('check-all').checked = false;
+  renderTabela();
+}
+
+async function enviarSelecionadosKanban() {
+  const ids = [...selectedIds];
+  if (!ids.length) return;
+  let ok = 0;
+  for (const id of ids) {
+    const row = allRows.find(r => r._id === id);
+    if (!row || row._status === 'contatado') continue;
+    await marcarContato(id);
+    ok++;
+  }
+  limparSelecao();
+  toast(`${ok} leads enviados ao Kanban ✓`, 'ok');
+}
+
+function excluirSelecionados() {
+  const ids = [...selectedIds];
+  if (!ids.length) return;
+  if (!confirm(`Excluir ${ids.length} empresa${ids.length !== 1 ? 's' : ''}?`)) return;
+  allRows = allRows.filter(r => !ids.has(r._id));
+  salvarDados();
+  selectedIds.clear();
+  updateSelBar();
+  updateStats();
+  updateProgress();
+  popularFiltros();
+  applyFilters();
+  toast(`${ids.length} removidos`, 'ok');
+}
+
+// ── MODO FOCO ──
+let focoLista = [];
+let focoIdx = 0;
+
+function abrirFoco() {
+  focoLista = allRows.filter(r => r._status !== 'contatado');
+  if (!focoLista.length) { toast('Nenhum lead pendente!', 'info'); return; }
+  focoIdx = 0;
+  document.getElementById('foco-overlay').classList.add('open');
+  renderFocoCard();
+}
+
+function fecharFoco() {
+  document.getElementById('foco-overlay').classList.remove('open');
+}
+
+function renderFocoCard() {
+  if (focoIdx >= focoLista.length) {
+    fecharFoco();
+    toast('Todos os leads foram processados! 🎯', 'ok');
+    return;
+  }
+  const r = focoLista[focoIdx];
+  const tel = r.telefone;
+  document.getElementById('foco-counter').textContent = `${focoIdx + 1} / ${focoLista.length} pendentes`;
+  document.getElementById('foco-nome').textContent = r.nome;
+  document.getElementById('foco-cat').textContent = r.categoria || '';
+  document.getElementById('foco-cidade').textContent = r.cidade || '';
+  document.getElementById('foco-tel-txt').textContent = formatTel(tel);
+  document.getElementById('foco-wa-btn').href = `https://wa.me/55${tel}`;
+  const btn = document.getElementById('foco-contato-btn');
+  btn.disabled = false;
+  btn.textContent = '📲 Contatei';
+}
+
+function copiarNomeFoco() {
+  const nome = focoLista[focoIdx]?.nome || '';
+  navigator.clipboard?.writeText(nome).then(() => toast(`"${nome}" copiado!`, 'ok'));
+}
+
+function copiarTelFoco() {
+  const tel = focoLista[focoIdx]?.telefone || '';
+  copiarTel(tel);
+}
+
+async function focoContatou() {
+  const r = focoLista[focoIdx];
+  if (!r) return;
+  const btn = document.getElementById('foco-contato-btn');
+  btn.disabled = true;
+  btn.textContent = '✓ Feito!';
+  await marcarContato(r._id);
+  setTimeout(() => { focoIdx++; renderFocoCard(); }, 600);
+}
+
+function focoProximo() { focoIdx = Math.min(focoIdx + 1, focoLista.length - 1); renderFocoCard(); }
+function focoAnterior() { focoIdx = Math.max(focoIdx - 1, 0); renderFocoCard(); }
+function focoPular() { focoIdx++; renderFocoCard(); }
+
+// ── HISTÓRICO DO LEAD ──
+function abrirHistorico(id) {
+  const row = allRows.find(r => r._id === id);
+  if (!row) return;
+  document.getElementById('hist-titulo').textContent = `Histórico — ${row.nome}`;
+  const content = document.getElementById('hist-content');
+  const items = [];
+  if (row._contatado_em) items.push({ label: '📲 Contatado', ts: row._contatado_em });
+  if (row.telefone) items.push({ label: `📞 Telefone: ${formatTel(row.telefone)}`, ts: null });
+  if (row.site) items.push({ label: `🌐 Site: ${row.site}`, ts: null });
+  if (row.categoria) items.push({ label: `🏷 Categoria: ${row.categoria}`, ts: null });
+  if (row.cidade) items.push({ label: `📍 Cidade: ${row.cidade}`, ts: null });
+  if (row.instagram) items.push({ label: `📸 Instagram: ${row.instagram}`, ts: null });
+  content.innerHTML = items.map(i => `
+    <div class="hist-item-row">
+      <div class="hist-dot"></div>
+      <div class="hist-info">
+        <div class="hist-label">${i.label}</div>
+        ${i.ts ? `<div class="hist-ts">${new Date(i.ts).toLocaleString('pt-BR')}</div>` : ''}
+      </div>
+    </div>`).join('') || '<p style="color:var(--gr);font-size:.85rem">Sem histórico ainda.</p>';
+  document.getElementById('hist-overlay').classList.add('open');
+}
+
+function fecharHistorico() {
+  document.getElementById('hist-overlay').classList.remove('open');
+}
+
+// ── MÉTRICAS DE CONVERSÃO ──
+function updateMetricas() {
+  const grid = document.getElementById('metricas-grid');
+  if (!grid || !allRows.length) return;
+  grid.style.display = 'grid';
+  const cont = allRows.filter(r => r._status === 'contatado').length;
+  // Respostas, demos e fechamentos vêm do Supabase leads originados de prospecção
+  // Por enquanto mostramos o que temos localmente
+  document.getElementById('m-total').textContent = cont;
+  const pctBase = cont => n => cont ? Math.round(n/cont*100)+'%' : '—';
+  const p = pctBase(cont);
+  // Placeholder — integrado com Kanban via Supabase
+  document.getElementById('m-resp').textContent = '—';
+  document.getElementById('m-demo').textContent = '—';
+  document.getElementById('m-fech').textContent = '—';
+}
+
+// ── ALERTA FOLLOW-UP 28H ──
+function checkFollowUp28h() {
+  const alert = document.getElementById('fu-alert');
+  const txt = document.getElementById('fu-alert-txt');
+  if (!alert) return;
+  const agora = Date.now();
+  const limite = 28 * 60 * 60 * 1000;
+  const atrasados = allRows.filter(r => {
+    if (r._status !== 'pendente') return false;
+    if (!r._contatado_em) return false;
+    return agora - new Date(r._contatado_em).getTime() > limite;
+  });
+  if (atrasados.length) {
+    alert.classList.add('show');
+    txt.textContent = `⚠️ ${atrasados.length} lead${atrasados.length !== 1 ? 's' : ''} sem resposta há mais de 28h — clique para ver`;
+  } else {
+    alert.classList.remove('show');
+  }
+}
+
+// CSS para linha selecionada
+const selStyle = document.createElement('style');
+selStyle.textContent = 'tr.selected{background:rgba(34,197,94,.05)!important}';
+document.head.appendChild(selStyle);
+
+// Patch updateStats para chamar métricas e follow-up
+const _origUpdateStats = updateStats;
+function updateStats() {
+  _origUpdateStats();
+  updateMetricas();
+  checkFollowUp28h();
+}
+
 init();
 </script>
 </body>
