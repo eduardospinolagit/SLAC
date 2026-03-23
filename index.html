@@ -1464,25 +1464,24 @@ async function saveLead(){
   finally{hideSaving()}
 }
 async function deleteLead(){
-  if(!currentLeadId||!confirm('Remover este lead e todas as receitas vinculadas?'))return;
+  if(!currentLeadId)return;
   const idParaDeletar=currentLeadId;
+  if(!confirm('Remover este lead permanentemente? Esta ação não pode ser desfeita.'))return;
   showSaving();
   try{
     const lead=leads.find(l=>l.id===idParaDeletar);
     const nome=lead?.nome||'';
     await sbRun(()=>sb.from('conversas').delete().eq('lead_id',idParaDeletar),'delConversas');
     if(nome){
-      // Busca por nome do cliente OU pela tag de lead_id no obs
       const txVinculadas=fin.filter(t=>
-        (t.cli&&t.cli.toLowerCase()===nome.toLowerCase()) ||
+        (t.cli&&t.cli.toLowerCase()===nome.toLowerCase())||
         (t.obs&&t.obs.includes('lead:'+idParaDeletar))
       );
-      console.log('Receitas vinculadas a',nome,':',txVinculadas.length,txVinculadas.map(t=>t.desc));
       for(const tx of txVinculadas){
         await sbRun(()=>sb.from('financeiro').delete().eq('id',tx.id).eq('user_id',currentUser.id),'delFin');
       }
       fin=fin.filter(t=>
-        !(t.cli&&t.cli.toLowerCase()===nome.toLowerCase()) &&
+        !(t.cli&&t.cli.toLowerCase()===nome.toLowerCase())&&
         !(t.obs&&t.obs.includes('lead:'+idParaDeletar))
       );
     }
@@ -1494,7 +1493,7 @@ async function deleteLead(){
     const p=document.querySelector('.page.active')?.id;
     if(p==='page-fin')renderFin();else renderDash();
     toast('Lead removido ✓','ok');
-  }catch(e){toast('Erro: '+e.message,'err')}
+  }catch(e){toast('Erro ao remover: '+e.message,'err');console.error(e);}
   finally{hideSaving()}
 }
 function openWA(){const tel=document.getElementById('ld-tel').value.replace(/\D/g,'');if(!tel){toast('Adicione um telefone','err');return}window.open('https://wa.me/55'+tel+'?text=Oi '+document.getElementById('ld-nome').value+'!','_blank');}
@@ -1998,7 +1997,7 @@ async function crmExcluirSelecionados() {
       await sb.from('leads').delete().eq('id', id).eq('user_id', currentUser.id);
     } catch(e) {}
   }
-  leads = leads.filter(l => !ids.has(l.id));
+  leads = leads.filter(l => !ids.includes(l.id));
   crmLimparSel();
   renderCRM();
   toast(`${ids.length} removidos ✓`, 'ok');
@@ -2022,4 +2021,39 @@ async function salvarNomeInicial(){
 }
 
 initAuth();
-</script></body></html>
+// ── MODAL CONFIRMAÇÃO (substitui confirm() nativo que pode ser bloqueado) ──
+let _confirmResolve = null;
+function showConfirm(msg, btnLabel='Confirmar', danger=true) {
+  return new Promise(resolve => {
+    _confirmResolve = resolve;
+    const mo = document.getElementById('mo-confirm');
+    document.getElementById('mo-confirm-msg').textContent = msg;
+    const btn = document.getElementById('mo-confirm-ok');
+    btn.textContent = btnLabel;
+    btn.style.background = danger ? '#ef4444' : '#22c55e';
+    mo.style.display = 'flex';
+  });
+}
+function _confirmOk() {
+  document.getElementById('mo-confirm').style.display = 'none';
+  if (_confirmResolve) { _confirmResolve(true); _confirmResolve = null; }
+}
+function _confirmCancel() {
+  document.getElementById('mo-confirm').style.display = 'none';
+  if (_confirmResolve) { _confirmResolve(false); _confirmResolve = null; }
+}
+</script>
+
+<!-- MODAL CONFIRMAÇÃO -->
+<div id="mo-confirm" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#111;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:28px;max-width:340px;width:100%;text-align:center">
+    <div style="font-size:1.5rem;margin-bottom:12px">⚠️</div>
+    <p id="mo-confirm-msg" style="font-size:.9rem;color:#f0f0f0;margin-bottom:24px;line-height:1.5"></p>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button onclick="_confirmCancel()" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#999;font-family:'Inter',sans-serif;font-size:.85rem;cursor:pointer">Cancelar</button>
+      <button id="mo-confirm-ok" onclick="_confirmOk()" style="flex:1;padding:10px;border-radius:8px;border:none;color:#fff;font-family:'Inter',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+</body></html>
