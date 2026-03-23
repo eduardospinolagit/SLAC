@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>SiposCC</title>
+<title>SLAC</title>
 
 <!-- PWA -->
 <link rel="manifest" href="/manifest.json"/>
 <meta name="theme-color" content="#0a0a0a"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
-<meta name="apple-mobile-web-app-title" content="Sipos Studio"/>
-<meta name="description" content="Command Center — Sipos Studio"/>
+<meta name="apple-mobile-web-app-title" content="SLAC"/>
+<meta name="description" content="SLAC — Sano Lab Advanced CRM"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 
 <!-- ÍCONES -->
@@ -392,7 +392,7 @@ tbody tr:hover td{background:#1a1a1a}
 
 <div id="login-screen">
   <div class="login-box">
-    <div class="login-logo">Sipos<span>.</span>Studio</div>
+    <div class="login-logo"><img src="logo.png" alt="Sano Lab" style="height:36px;width:auto;display:block;margin:0 auto 6px"/></div>
     <div class="login-tagline">Command Center — Acesso restrito</div>
     <h2>Entrar na sua conta</h2>
     <div class="lfg"><label>Email</label><input class="li" id="l-email" type="email" placeholder="seu@email.com" onkeydown="if(event.key==='Enter')doLogin()"/></div>
@@ -411,7 +411,7 @@ tbody tr:hover td{background:#1a1a1a}
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
-  <div class="sb-logo"><div class="name">Sipos<span>.</span>Studio</div><div class="sub">Command Center</div></div>
+  <div class="sb-logo"><img src="logo.png" alt="Sano Lab" style="height:32px;width:auto;display:block;margin-bottom:4px"/><div class="sub" style="font-size:.68rem;color:var(--gr)">Advanced CRM</div></div>
   <div class="sb-sec">
     <div class="sb-label">Páginas</div>
     <div class="sb-item active" id="nav-dash" onclick="goPage('dash')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Dashboard</div>
@@ -419,6 +419,7 @@ tbody tr:hover td{background:#1a1a1a}
     <div class="sb-item" id="nav-fin" onclick="goPage('fin')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Financeiro</div>
     <div class="sb-item" id="nav-rec" onclick="goPage('rec')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Recorrências</div>
     <div class="sb-item" id="nav-mapa" onclick="goPage('mapa')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg> Mapa Mental</div>
+    <div class="sb-item" id="nav-prosp" onclick="window.open('prospeccao.html','_blank')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg> Prospecção</div>
   </div>
   <div class="sb-sec">
     <div class="sb-label">Categorias</div>
@@ -432,7 +433,7 @@ tbody tr:hover td{background:#1a1a1a}
   <div class="sb-footer">
     <div class="user-info"><span class="user-email" id="user-email">Eduardo Spínola</span><span class="user-badge">✓ auth</span></div>
     <button class="logout-btn" onclick="doLogout()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sair</button>
-    <div style="font-size:.65rem;color:#333;text-align:center;margin-top:10px;padding-top:8px;border-top:1px solid #1a1a1a">Desenvolvido por Sipos Studio © 2026</div>
+    <div style="font-size:.65rem;color:#333;text-align:center;margin-top:10px;padding-top:8px;border-top:1px solid #1a1a1a">Desenvolvido por Sano Lab © 2026</div>
   </div>
 </aside>
 
@@ -584,6 +585,7 @@ tbody tr:hover td{background:#1a1a1a}
     <button class="mob-item" id="mnav-fin" onclick="goPage('fin')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Financ.</button>
     <button class="mob-item" id="mnav-rec" onclick="goPage('rec')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>Recorr.</button>
     <button class="mob-item" id="mnav-mapa" onclick="goPage('mapa')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>Mapa</button>
+    <button class="mob-item" id="mnav-prosp" onclick="window.open('prospeccao.html','_blank')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>Prospecção</button>
   </div>
 </nav>
 
@@ -593,7 +595,7 @@ tbody tr:hover td{background:#1a1a1a}
 <button class="ai-bubble" onclick="toggleAI()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
 <div class="ai-float" id="ai-float">
   <div class="ai-float-head"><div class="ai-float-title"><div class="ai-dot"></div>Assistente IA</div><button class="ai-float-close" onclick="toggleAI()">✕</button></div>
-  <div class="ai-msgs" id="ai-msgs"><div class="msg msg-ai">Oi Eduardo! Pronto pra ajudar com estratégias e ações da Sipos Studio.</div></div>
+  <div class="ai-msgs" id="ai-msgs"><div class="msg msg-ai">Oi Eduardo! Pronto pra ajudar com estratégias e ações da Sano Lab.</div></div>
   <div class="qbtns">
     <button class="qbtn" onclick="qMsg('Quais são as prioridades agora?')">Prioridades</button>
     <button class="qbtn" onclick="qMsg('Como fechar meu primeiro cliente?')">Fechar cliente</button>
@@ -1232,7 +1234,7 @@ async function saveItem(){
   document.getElementById('mi-title').value='';document.getElementById('mi-desc').value='';toast('Adicionado ✓','ok');
 }
 function closeMo(id){document.getElementById('mo-'+id).classList.remove('open')}
-function exportar(){const b=new Blob([JSON.stringify({mapa:dados,financeiro:fin,pagamentos:pgto,meta},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='sipos-backup.json';a.click();}
+function exportar(){const b=new Blob([JSON.stringify({mapa:dados,financeiro:fin,pagamentos:pgto,meta},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='sanolab-backup.json';a.click();}
 
 // REALTIME
 function initRealtime(){
@@ -1253,7 +1255,7 @@ function initRealtime(){
 }
 
 // IA
-const AI_SYS='Você é assistente pessoal do Eduardo Spínola, Sipos Studio. Pode executar ações reais. Ao identificar uma ação, inclua no final: <action>{"type":"TIPO","data":{...}}</action>. TIPOS: CRIAR_TRANSACAO({tipo,desc,val,cat?,cli?,rec?,st?,obs?}), ATUALIZAR_LEAD({nome,etapa?,prioridade?,proximo_followup?,notas?}), CRIAR_LEAD({nome,telefone,negocio?,categoria?,etapa?}), ATUALIZAR_META({val,desc?}). Seja direto em pt-BR. Pacotes: R$797/1097/1397.';
+const AI_SYS='Você é assistente pessoal do Eduardo Spínola, Sano Lab. Pode executar ações reais. Ao identificar uma ação, inclua no final: <action>{"type":"TIPO","data":{...}}</action>. TIPOS: CRIAR_TRANSACAO({tipo,desc,val,cat?,cli?,rec?,st?,obs?}), ATUALIZAR_LEAD({nome,etapa?,prioridade?,proximo_followup?,notas?}), CRIAR_LEAD({nome,telefone,negocio?,categoria?,etapa?}), ATUALIZAR_META({val,desc?}). Seja direto em pt-BR. Pacotes: R$797/1097/1397.';
 let chatH=[];
 async function sendAI(){
   const inp=document.getElementById('ai-inp');const msg=inp.value.trim();if(!msg)return;inp.value='';
@@ -1801,7 +1803,7 @@ function agendarNotifDiaria(){
       const d=new Date(l.proximo_followup);d.setHours(0,0,0,0);return d<=hoje;
     });
     if(fuHoje.length){
-      new Notification('SiposCC — Follow-ups',{
+      new Notification('SLAC — Follow-ups',{
         body:fuHoje.length+' follow-up'+(fuHoje.length>1?'s':'')+' pendente'+(fuHoje.length>1?'s':'')+' hoje!',
         icon:'/icons/web-app-manifest-192x192.png'
       });
