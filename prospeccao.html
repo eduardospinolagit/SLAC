@@ -4,6 +4,8 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <title>Prospecção — SLAC</title>
+<link rel="icon" type="image/png" href="favicon.png"/>
+<link rel="apple-touch-icon" href="favicon.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
@@ -83,6 +85,9 @@ tbody td{padding:11px 14px;vertical-align:middle}
 .btn-contact:hover{background:rgba(34,197,94,.15);border-color:var(--g)}
 .btn-contact.done{border-color:rgba(255,255,255,.08);background:transparent;color:var(--gr);cursor:default}
 .btn-contact.done:hover{background:transparent;border-color:rgba(255,255,255,.08);color:var(--gr)}
+.btn-del-row{padding:5px 8px;border-radius:6px;font-size:.72rem;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;border:1px solid rgba(239,68,68,.25);background:transparent;color:rgba(239,68,68,.6);line-height:1}
+.btn-del-row:hover{background:rgba(239,68,68,.1);border-color:var(--red);color:var(--red)}
+.action-cell{display:flex;align-items:center;gap:6px;justify-content:flex-end}
 
 /* ── IMPORT ZONE ── */
 .import-zone{margin:20px;border:2px dashed var(--brd);border-radius:12px;padding:40px 24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s}
@@ -128,6 +133,27 @@ tbody td{padding:11px 14px;vertical-align:middle}
 /* ── PROGRESS ── */
 .progress-bar{height:3px;background:rgba(34,197,94,.15);border-radius:999px;overflow:hidden;margin:0 20px}
 .progress-fill{height:100%;background:var(--g);border-radius:999px;transition:width .3s}
+/* Indicador de progresso diário */
+.daily-goal{background:#111;border-bottom:1px solid var(--brd);padding:14px 20px;display:none}
+.daily-goal-inner{max-width:680px}
+.daily-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px;flex-wrap:wrap}
+.daily-label{font-size:.82rem;font-weight:600;color:#f0f0f0}
+.daily-count{font-size:1.5rem;font-weight:800;line-height:1}
+.daily-count .n-atual{color:var(--g)}
+.daily-count .n-sep{color:#333;margin:0 4px}
+.daily-count .n-meta{color:#f0f0f0}
+.daily-meta{color:#555;font-size:.72rem;margin-top:2px}
+.daily-edit{display:flex;align-items:center;gap:6px}
+.daily-edit input{width:64px;padding:5px 8px;background:#0d0d0d;border:1px solid var(--brd);border-radius:6px;color:#f0f0f0;font-family:'Inter',sans-serif;font-size:.82rem;outline:none;text-align:center;transition:border-color .2s}
+.daily-edit input:focus{border-color:rgba(34,197,94,.4)}
+.daily-edit label{font-size:.75rem;color:var(--gr);white-space:nowrap}
+.daily-bar-wrap{background:rgba(255,255,255,.05);border-radius:999px;height:8px;overflow:hidden;position:relative}
+.daily-bar-fill{height:100%;border-radius:999px;transition:width .5s cubic-bezier(.22,1,.36,1);background:linear-gradient(90deg,#16a34a,#22c55e)}
+.daily-bar-fill.done{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.daily-bar-fill.over{background:linear-gradient(90deg,#22c55e,#86efac)}
+.daily-msg{font-size:.75rem;color:var(--gr);margin-top:6px;min-height:1em;transition:color .3s}
+.daily-msg.win{color:var(--g);font-weight:600}
+.daily-msg.fire{color:#f59e0b;font-weight:600}
 
 @media(max-width:640px){
   .topbar{padding:10px 12px}
@@ -173,6 +199,29 @@ tbody td{padding:11px 14px;vertical-align:middle}
 </div>
 
 <!-- PROGRESS -->
+<!-- INDICADOR DIÁRIO -->
+<div class="daily-goal" id="daily-goal">
+  <div class="daily-goal-inner">
+    <div class="daily-top">
+      <div>
+        <div class="daily-count">
+          <span class="n-atual" id="dg-atual">0</span><span class="n-sep">/</span><span class="n-meta" id="dg-meta-lbl">50</span>
+          <span style="font-size:.78rem;font-weight:500;color:var(--gr);margin-left:8px">contatos feitos hoje</span>
+        </div>
+        <div class="daily-meta" id="dg-date"></div>
+      </div>
+      <div class="daily-edit">
+        <label for="dg-input">Meta do dia:</label>
+        <input type="number" id="dg-input" min="1" max="500" value="50" onchange="salvarMeta()" oninput="salvarMeta()"/>
+      </div>
+    </div>
+    <div class="daily-bar-wrap">
+      <div class="daily-bar-fill" id="dg-fill" style="width:0%"></div>
+    </div>
+    <div class="daily-msg" id="dg-msg">Bora! Cada contato é uma oportunidade.</div>
+  </div>
+</div>
+
 <div class="progress-bar" id="progress-bar" style="display:none">
   <div class="progress-fill" id="progress-fill" style="width:0%"></div>
 </div>
@@ -200,8 +249,8 @@ tbody td{padding:11px 14px;vertical-align:middle}
 <!-- IMPORT ZONE -->
 <div class="import-zone" id="import-zone" ondragover="e.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="e.preventDefault();this.classList.remove('drag');handleFile(e.dataTransfer.files[0])" onclick="document.getElementById('file-input').click()">
   <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="12"/><line x1="15" y1="15" x2="12" y2="12"/></svg>
-  <p>Arraste o CSV do Apify aqui ou <strong>clique para selecionar</strong></p>
-  <span>Aceita qualquer CSV exportado pelo Apify Google Maps Scraper · <strong>SLAC</strong> — Sano Lab</span>
+  <p>Arraste o arquivo CSV aqui ou <strong>clique para selecionar</strong></p>
+  <span>Aceita qualquer arquivo .csv com colunas de nome, telefone, categoria, cidade e site</span>
 </div>
 
 <!-- COLUMN MAP -->
@@ -368,6 +417,7 @@ function mostrarMapeamento() {
   document.getElementById('col-map').style.display = 'block';
   document.getElementById('tbl-container').style.display = 'none';
   document.getElementById('stats-bar').style.display = 'none';
+  document.getElementById('daily-goal').style.display = 'none';
   document.getElementById('filters-bar').style.display = 'none';
   document.getElementById('pagination').style.display = 'none';
   document.getElementById('btn-limpar').style.display = 'none';
@@ -548,10 +598,13 @@ function renderTabela() {
       <td class="td-site">${r.site ? `<a href="${escHtml(r.site)}" target="_blank" rel="noopener">${escHtml(r.site.replace(/^https?:\/\//, ''))}</a>` : '<span class="sem-site">Sem site</span>'}</td>
       <td class="td-status"><span class="badge ${badgeClass}">${badgeLabel}</span></td>
       <td style="text-align:right">
-        <button class="btn-contact ${contatado ? 'done' : ''}" onclick="${contatado ? '' : `marcarContato('${r._id}')`}"
-          ${contatado ? 'disabled' : ''} title="${contatado && r._contatado_em ? 'Contatado em ' + new Date(r._contatado_em).toLocaleString('pt-BR') : ''}">
-          ${contatado ? '✓ Contatei · ' + (r._contatado_em ? new Date(r._contatado_em).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '') : '📲 Contatei'}
-        </button>
+        <div class="action-cell">
+          <button class="btn-contact ${contatado ? 'done' : ''}" onclick="${contatado ? '' : `marcarContato('${r._id}')`}"
+            ${contatado ? 'disabled' : ''} title="${contatado && r._contatado_em ? 'Contatado em ' + new Date(r._contatado_em).toLocaleString('pt-BR') : 'Marcar como contatado e enviar ao Kanban'}">
+            ${contatado ? '✓ Contatei · ' + (r._contatado_em ? new Date(r._contatado_em).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '') : '📲 Contatei'}
+          </button>
+          <button class="btn-del-row" onclick="excluirLead('${r._id}')" title="Excluir da lista">🗑</button>
+        </div>
       </td>
     </tr>`;
   }).join('');
@@ -612,7 +665,7 @@ async function marcarContato(id) {
   if (row.site) notasPartes.push(`Site atual: ${row.site}`);
   if (row.instagram) notasPartes.push(`Instagram: ${row.instagram}`);
   notasPartes.push(`Contatado em: ${agora.toLocaleString('pt-BR')}`);
-  notasPartes.push(`Origem: Prospecção Apify`);
+  notasPartes.push(`Origem: Prospecção CSV`);
 
   // Criar lead no Supabase na etapa "contato"
   try {
@@ -642,6 +695,17 @@ async function marcarContato(id) {
   updateStats();
   updateProgress();
   applyFilters();
+}
+
+function excluirLead(id) {
+  if (!confirm('Remover esta empresa da lista?')) return;
+  allRows = allRows.filter(r => r._id !== id);
+  salvarDados();
+  updateStats();
+  updateProgress();
+  popularFiltros();
+  applyFilters();
+  toast('Removido da lista', 'ok');
 }
 
 function copiarTel(tel) {
@@ -686,6 +750,74 @@ function updateProgress() {
   } else {
     bar.style.display = 'none';
   }
+  updateDailyGoal();
+}
+
+// ── INDICADOR DIÁRIO ──
+const dgStorageKey = () => `dg_${new Date().toDateString()}`;
+const dgMetaKey = 'dg_meta';
+
+function getDailyCount() {
+  // Conta apenas contatos feitos HOJE
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  return allRows.filter(r => {
+    if (r._status !== 'contatado' || !r._contatado_em) return false;
+    const d = new Date(r._contatado_em); d.setHours(0,0,0,0);
+    return d.getTime() === hoje.getTime();
+  }).length;
+}
+
+function getDailyMeta() {
+  return parseInt(localStorage.getItem(dgMetaKey) || '50', 10);
+}
+
+function salvarMeta() {
+  const v = parseInt(document.getElementById('dg-input').value, 10);
+  if (!v || v < 1) return;
+  localStorage.setItem(dgMetaKey, v);
+  updateDailyGoal();
+}
+
+function updateDailyGoal() {
+  const atual = getDailyCount();
+  const meta = getDailyMeta();
+  const pct = Math.min(100, Math.round(atual / meta * 100));
+  const over = atual > meta;
+  const done = atual >= meta;
+
+  document.getElementById('dg-atual').textContent = atual;
+  document.getElementById('dg-meta-lbl').textContent = meta;
+  document.getElementById('dg-input').value = meta;
+
+  const hoje = new Date();
+  document.getElementById('dg-date').textContent =
+    hoje.toLocaleDateString('pt-BR', {weekday:'long', day:'2-digit', month:'long'});
+
+  const fill = document.getElementById('dg-fill');
+  fill.style.width = pct + '%';
+  fill.className = 'daily-bar-fill' + (over ? ' over' : done ? ' done' : '');
+
+  const msgEl = document.getElementById('dg-msg');
+  const faltam = meta - atual;
+  if (atual === 0) {
+    msgEl.textContent = 'Bora! Cada contato é uma oportunidade.';
+    msgEl.className = 'daily-msg';
+  } else if (atual < meta * 0.3) {
+    msgEl.textContent = `Bom começo! Faltam ${faltam} para bater a meta.`;
+    msgEl.className = 'daily-msg';
+  } else if (atual < meta * 0.6) {
+    msgEl.textContent = `No caminho certo! ${faltam} contatos para a meta.`;
+    msgEl.className = 'daily-msg';
+  } else if (atual < meta) {
+    msgEl.textContent = `Quase lá! Só mais ${faltam} contatos. 💪`;
+    msgEl.className = 'daily-msg win';
+  } else if (atual === meta) {
+    msgEl.textContent = `🎯 Meta batida! ${atual} contatos hoje. Excelente!`;
+    msgEl.className = 'daily-msg fire';
+  } else {
+    msgEl.textContent = `🔥 Meta superada! ${atual} contatos hoje — ${atual - meta} acima da meta!`;
+    msgEl.className = 'daily-msg fire';
+  }
 }
 
 function confirmarLimpar() {
@@ -693,6 +825,7 @@ function confirmarLimpar() {
   allRows = [];
   salvarDados();
   document.getElementById('stats-bar').style.display = 'none';
+  document.getElementById('daily-goal').style.display = 'none';
   document.getElementById('filters-bar').style.display = 'none';
   document.getElementById('tbl-container').style.display = 'none';
   document.getElementById('pagination').style.display = 'none';
