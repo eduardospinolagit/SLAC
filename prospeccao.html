@@ -239,7 +239,7 @@ tbody td{padding:11px 14px;vertical-align:middle}
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
       Modo Foco
     </button>
-    <button class="btn btn-gh" onclick="document.getElementById('file-input').click()">
+    <button class="btn btn-gh" onclick="abrirSeletorCSV()">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       Importar CSV
     </button>
@@ -319,7 +319,7 @@ tbody td{padding:11px 14px;vertical-align:middle}
   ondragover="event.preventDefault();this.classList.add('drag')"
   ondragleave="this.classList.remove('drag')"
   ondrop="event.preventDefault();this.classList.remove('drag');handleFile(event.dataTransfer.files[0])"
-  onclick="document.getElementById('file-input').click()">
+  onclick="abrirSeletorCSV()">
   <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="12"/><line x1="15" y1="15" x2="12" y2="12"/></svg>
   <p>Arraste o arquivo CSV aqui ou <strong>clique para selecionar</strong></p>
   <span>Aceita qualquer arquivo .csv com colunas de nome, telefone, categoria, cidade e site</span>
@@ -531,31 +531,57 @@ async function carregarDados() {
 }
 
 // ── PARSE CSV ──
+function detectDelimiter(text) {
+  const first = text.split(/\r?\n/)[0] || '';
+  const commas = (first.match(/,/g) || []).length;
+  const semis  = (first.match(/;/g) || []).length;
+  const tabs   = (first.match(/\t/g) || []).length;
+  if (tabs > commas && tabs > semis) return '\t';
+  if (semis > commas) return ';';
+  return ',';
+}
+
 function parseCSV(text) {
+  // Remove BOM se existir
+  text = text.replace(/^\uFEFF/, '');
+  const delim = detectDelimiter(text);
   const lines = text.split(/\r?\n/).filter(l => l.trim());
   if (!lines.length) return { headers:[], rows:[] };
-  const headers = parseLine(lines[0]);
+  const headers = parseLine(lines[0], delim).map(h => h.trim());
+  if (!headers.length) return { headers:[], rows:[] };
   const rows = lines.slice(1).map(l => {
-    const vals = parseLine(l);
+    const vals = parseLine(l, delim);
     const obj = {};
-    headers.forEach((h, i) => { obj[h] = vals[i] || ''; });
+    headers.forEach((h, i) => { obj[h] = (vals[i] || '').trim(); });
     return obj;
-  }).filter(r => Object.values(r).some(v => v.trim()));
+  }).filter(r => Object.values(r).some(v => v));
   return { headers, rows };
 }
-function parseLine(line) {
+
+function parseLine(line, delim = ',') {
   const result = [];
   let cur = '', inQ = false;
-  for (const c of line) {
-    if (c === '"') { inQ = !inQ; continue; }
-    if (c === ',' && !inQ) { result.push(cur.trim()); cur = ''; continue; }
-    cur += c;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQ && line[i+1] === '"') { cur += '"'; i++; continue; } // escaped quote
+      inQ = !inQ;
+      continue;
+    }
+    if (ch === delim && !inQ) { result.push(cur.trim()); cur = ''; continue; }
+    cur += ch;
   }
   result.push(cur.trim());
   return result;
 }
 
 // ── FILE ──
+function abrirSeletorCSV() {
+  const inp = document.getElementById('file-input');
+  inp.value = ''; // reseta para aceitar mesmo arquivo de novo
+  inp.click();
+}
+
 function handleFile(file) {
   if (!file || !file.name.endsWith('.csv')) { toast('Selecione um arquivo .csv', 'err'); return; }
   const reader = new FileReader();
