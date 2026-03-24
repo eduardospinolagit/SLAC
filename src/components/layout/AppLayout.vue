@@ -26,7 +26,7 @@
           <p class="sb-section-label">Ferramentas</p>
           <button class="sb-item" :class="{ active: route.path === '/prospeccao' }"
             @click="go('/prospeccao')" title="Prospecção">
-            <span class="sb-icon" v-html="icons.search"></span>
+            <span class="sb-icon" v-html="icons_search.search"></span>
             <span class="sb-text">Prospecção</span>
           </button>
         </div>
