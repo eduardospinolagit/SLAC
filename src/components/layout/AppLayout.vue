@@ -6,7 +6,7 @@
 
       <!-- Topo: logo + toggle -->
       <div class="sb-top">
-        <div class="sb-brand" v-show="!collapsed">
+        <div class="sb-brand" 
           <img src="/logo.png" alt="SLAC" class="sb-logo-img" />
           <span class="sb-brand-name">SLAC</span>
         </div>
@@ -22,23 +22,23 @@
       <!-- Nav -->
       <nav class="sb-nav">
         <div class="sb-group">
-          <span class="sb-group-label" v-show="!collapsed">Principal</span>
+          <span class="sb-group-label" Principal</span>
           <button v-for="item in mainNav" :key="item.path"
             class="sb-item" :class="{ active: route.path === item.path }"
             @click="go(item.path)" :title="collapsed ? item.label : ''"
           >
             <span class="sb-icon" v-html="item.icon"></span>
-            <span class="sb-label" v-show="!collapsed">{{ item.label }}</span>
+            <span class="sb-label" {{ item.label }}</span>
           </button>
         </div>
 
         <div class="sb-group">
-          <span class="sb-group-label" v-show="!collapsed">Ferramentas</span>
+          <span class="sb-group-label" Ferramentas</span>
           <button class="sb-item" :class="{ active: route.path === '/prospeccao' }"
             @click="go('/prospeccao')" :title="collapsed ? 'Prospecção' : ''"
           >
             <span class="sb-icon" v-html="icons.prospeccao"></span>
-            <span class="sb-label" v-show="!collapsed">Prospecção</span>
+            <span class="sb-label" Prospecção</span>
           </button>
         </div>
       </nav>
@@ -58,12 +58,12 @@
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
             </svg>
           </span>
-          <span class="sb-label" v-show="!collapsed">{{ isDark ? 'Modo claro' : 'Modo escuro' }}</span>
+          <span class="sb-label" {{ isDark ? 'Modo claro' : 'Modo escuro' }}</span>
         </button>
 
         <div class="sb-user" :title="collapsed ? auth.userName : ''">
           <div class="avatar avatar-sm">{{ userInitial }}</div>
-          <div class="sb-user-info" v-show="!collapsed">
+          <div class="sb-user-info" 
             <span class="sb-user-name">{{ auth.userName }}</span>
             <span class="badge badge-accent" style="font-size:.6rem;padding:.1rem .4rem">PRO</span>
           </div>
@@ -77,10 +77,10 @@
               <line x1="21" y1="12" x2="9" y2="12"/>
             </svg>
           </span>
-          <span class="sb-label" v-show="!collapsed">Sair</span>
+          <span class="sb-label" Sair</span>
         </button>
 
-        <div class="sb-dev" v-show="!collapsed">Desenvolvido por Sano Lab</div>
+        <div class="sb-dev" Desenvolvido por Sano Lab</div>
       </div>
     </aside>
 
@@ -345,7 +345,8 @@ function go(path) { router.push(path) }
   cursor: pointer;
   text-align: left;
   white-space: nowrap;
-  transition: background-color 120ms ease, color 120ms ease;
+  transition: background-color 120ms ease, color 120ms ease, padding 220ms ease, justify-content 220ms ease;
+  overflow: hidden;
 }
 .sb-item:hover { background: var(--accent-subtle); color: var(--accent); }
 .sb-item:hover .sb-icon { opacity: 1; }
@@ -368,6 +369,21 @@ function go(path) { router.push(path) }
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
+  opacity: 1;
+  max-width: 200px;
+  transition: opacity 180ms ease, max-width 220ms ease;
+  white-space: nowrap;
+}
+
+/* Esconde labels via CSS puro — sem v-show, sem reflow */
+.sb-col .sb-label,
+.sb-col .sb-group-label,
+.sb-col .sb-brand-name,
+.sb-col .sb-user-info,
+.sb-col .sb-dev {
+  opacity: 0;
+  max-width: 0;
+  pointer-events: none;
 }
 
 /* Colapsado */

@@ -1,17 +1,15 @@
 // src/composables/useTheme.js
-// Gerencia dark/light mode com persistência no localStorage
-
 import { ref } from 'vue'
 
 const STORAGE_KEY = 'slac-theme'
-const theme = ref('dark') // escopo global — compartilhado entre componentes
+const theme = ref('dark')
 
 function applyTheme(value) {
   document.documentElement.setAttribute('data-theme', value)
   theme.value = value
 }
 
-export function initTheme() {
+function initTheme() {
   const saved = localStorage.getItem(STORAGE_KEY)
   if (saved === 'light' || saved === 'dark') {
     applyTheme(saved)
@@ -21,16 +19,12 @@ export function initTheme() {
   }
 }
 
-export function useTheme() {
-  function toggleTheme() {
-    const next = theme.value === 'dark' ? 'light' : 'dark'
-    applyTheme(next)
-    localStorage.setItem(STORAGE_KEY, next)
-  }
+function toggleTheme() {
+  const next = theme.value === 'dark' ? 'light' : 'dark'
+  applyTheme(next)
+  localStorage.setItem(STORAGE_KEY, next)
+}
 
-  return {
-    theme,       // ref reativa — use em computed ou template
-    toggleTheme,
-    initTheme,
-  }
+export function useTheme() {
+  return { theme, toggleTheme, initTheme, isDark: () => theme.value === 'dark' }
 }
