@@ -4,10 +4,7 @@
     <aside class="sidebar">
       <!-- Topo -->
       <div class="sb-top">
-        <div class="sb-brand">
-          <img src="/logo.png" alt="SLAC" class="sb-logo-img" />
-          <span class="sb-brand-name">SLAC</span>
-        </div>
+        <img src="/logo.png" alt="SLAC" class="sb-logo-img" />
         <button class="sb-toggle" @click="toggle" :title="collapsed ? 'Expandir' : 'Recolher'">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline v-if="collapsed" points="9 18 15 12 9 6"/>
@@ -28,7 +25,6 @@
             <span class="sb-label">{{ item.label }}</span>
           </button>
         </div>
-
         <div class="sb-group">
           <span class="sb-group-label">Ferramentas</span>
           <button class="sb-item" :class="{ active: route.path === '/prospeccao' }"
@@ -62,7 +58,7 @@
           <div class="avatar avatar-sm">{{ userInitial }}</div>
           <div class="sb-user-info">
             <span class="sb-user-name">{{ auth.userName }}</span>
-            <span class="badge badge-accent" style="font-size:.6rem;padding:.1rem .4rem">PRO</span>
+            <span class="badge badge-accent" style="font-size:.6rem;padding:.1rem .4rem;width:fit-content">PRO</span>
           </div>
         </div>
 
@@ -176,8 +172,8 @@ const mobileNav = [
   { path: '/prospeccao', short: 'Prosp.', icon: icons.prospeccao },
 ]
 
-const welcomeInput    = ref(null)
-const welcomeName     = ref('')
+const welcomeInput     = ref(null)
+const welcomeName      = ref('')
 const showWelcomeModal = ref(false)
 
 onMounted(async () => {
@@ -224,50 +220,29 @@ function go(path) { router.push(path) }
   z-index: 100;
   transition: width 240ms cubic-bezier(.4,0,.2,1), min-width 240ms cubic-bezier(.4,0,.2,1);
 }
-
-.sb-col .sidebar {
-  width: 64px;
-  min-width: 64px;
-}
+.sb-col .sidebar { width: 64px; min-width: 64px; }
 
 /* Topo */
 .sb-top {
   display: flex;
   align-items: center;
-  padding: .875rem .75rem;
+  justify-content: space-between;
+  padding: 1rem .75rem;
   border-bottom: 1px solid var(--border-subtle);
   gap: .5rem;
-  min-height: 58px;
+  min-height: 62px;
   flex-shrink: 0;
 }
-
-.sb-brand {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-}
+.sb-col .sb-top { justify-content: center; flex-direction: column; gap: .75rem; padding: .875rem .5rem; }
 
 .sb-logo-img {
-  height: 26px;
-  width: 26px;
+  height: 36px;
+  width: auto;
   object-fit: contain;
   flex-shrink: 0;
+  transition: height 240ms ease;
 }
-
-.sb-brand-name {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  letter-spacing: -.03em;
-  white-space: nowrap;
-  opacity: 1;
-  transition: opacity 200ms ease;
-}
-.sb-col .sb-brand-name { opacity: 0; }
+.sb-col .sb-logo-img { height: 30px; }
 
 .sb-toggle {
   display: flex;
@@ -283,12 +258,8 @@ function go(path) { router.push(path) }
   flex-shrink: 0;
   transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
 }
-.sb-toggle:hover {
-  background: var(--accent-subtle);
-  color: var(--accent);
-  border-color: var(--accent);
-}
-.sb-col .sb-top { justify-content: space-between; }
+.sb-toggle:hover { background: var(--accent-subtle); color: var(--accent); border-color: var(--accent); }
+.sb-col .sb-toggle { width: 30px; height: 30px; }
 
 /* Nav */
 .sb-nav {
@@ -299,11 +270,7 @@ function go(path) { router.push(path) }
   display: flex;
   flex-direction: column;
 }
-
-.sb-group {
-  padding: 0 .5rem;
-  margin-bottom: .25rem;
-}
+.sb-group { padding: 0 .5rem; margin-bottom: .25rem; }
 .sb-col .sb-group { padding: 0 .375rem; }
 
 .sb-group-label {
@@ -320,14 +287,8 @@ function go(path) { router.push(path) }
   max-height: 30px;
   transition: opacity 180ms ease, max-height 240ms ease, padding 240ms ease;
 }
-.sb-col .sb-group-label {
-  opacity: 0;
-  max-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-}
+.sb-col .sb-group-label { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; }
 
-/* Items */
 .sb-item {
   display: flex;
   align-items: center;
@@ -352,10 +313,8 @@ function go(path) { router.push(path) }
 .sb-item.active { background: var(--accent-subtle); color: var(--accent); font-weight: 600; }
 .sb-item.active .sb-icon { opacity: 1; }
 .sb-item--danger:hover { background: var(--status-danger-subtle); color: var(--status-danger); }
-
 .sb-col .sb-item { justify-content: center; padding: .625rem .5rem; gap: 0; }
 
-/* Ícone */
 .sb-icon {
   display: flex;
   align-items: center;
@@ -370,7 +329,6 @@ function go(path) { router.push(path) }
 .sb-col .sb-item:hover .sb-icon,
 .sb-col .sb-item.active .sb-icon { opacity: 1; }
 
-/* Label — esconde via CSS, sem v-show */
 .sb-label {
   flex: 1;
   overflow: hidden;
@@ -379,15 +337,11 @@ function go(path) { router.push(path) }
   max-width: 160px;
   transition: opacity 180ms ease, max-width 240ms ease;
 }
-.sb-col .sb-label {
-  opacity: 0;
-  max-width: 0;
-  pointer-events: none;
-}
+.sb-col .sb-label { opacity: 0; max-width: 0; pointer-events: none; }
 
 /* Footer */
 .sb-footer {
-  padding: .5rem .5rem .75rem;
+  padding: .5rem .5rem .875rem;
   border-top: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
@@ -399,16 +353,17 @@ function go(path) { router.push(path) }
   display: flex;
   align-items: center;
   gap: .625rem;
-  padding: .375rem .625rem;
+  padding: .5rem .625rem;
   border-radius: var(--radius-md);
   overflow: hidden;
+  min-height: 44px;
 }
-.sb-col .sb-user { justify-content: center; padding: .5rem .375rem; }
+.sb-col .sb-user { justify-content: center; padding: .5rem; }
 
 .sb-user-info {
   display: flex;
   flex-direction: column;
-  gap: .125rem;
+  gap: .2rem;
   min-width: 0;
   opacity: 1;
   max-width: 160px;
@@ -423,6 +378,7 @@ function go(path) { router.push(path) }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.2;
 }
 
 .sb-dev {
@@ -433,8 +389,8 @@ function go(path) { router.push(path) }
   padding-top: .25rem;
   white-space: nowrap;
   overflow: hidden;
-  transition: opacity 180ms ease, max-height 240ms ease;
   max-height: 20px;
+  transition: opacity 180ms ease, max-height 240ms ease;
 }
 .sb-col .sb-dev { opacity: 0; max-height: 0; }
 
@@ -454,7 +410,6 @@ function go(path) { router.push(path) }
   align-items: center;
   padding-top: .25rem;
 }
-
 .mob-item {
   display: flex;
   flex-direction: column;
