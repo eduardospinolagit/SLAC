@@ -708,19 +708,14 @@ onMounted(() => {
 
 /* Kanban */
 .kanban-board {
-  display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-  padding: 0 0 1rem 0;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: .75rem;
   min-height: 480px;
-  /* Permite scroll sem cortar sombras dos cards */
-  margin: 0 -2rem;
-  padding-left: 2rem;
-  padding-right: 2rem;
 }
 .kanban-col {
-  min-width: 260px;
-  max-width: 260px;
+  min-width: 0;
+  max-width: 100%;
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
@@ -928,9 +923,11 @@ onMounted(() => {
 /* Responsive */
 @media (max-width: 1100px) {
   .kpi-grid--5 { grid-template-columns: repeat(3, 1fr); }
+  .kanban-board { grid-template-columns: repeat(3, 1fr); }
 }
 @media (max-width: 768px) {
   .crm-page { padding: 1rem 1rem 5rem; }
   .kpi-grid--5 { grid-template-columns: repeat(2, 1fr); }
+  .kanban-board { grid-template-columns: repeat(2, 1fr); }
 }
 </style>

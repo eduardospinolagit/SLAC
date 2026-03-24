@@ -1,70 +1,76 @@
 <template>
-  <div class="layout">
+  <div class="layout" :class="{ 'sidebar-collapsed': collapsed }">
     <!-- SIDEBAR DESKTOP -->
     <aside class="sidebar">
 
-      <!-- Logo -->
+      <!-- Logo + collapse button -->
       <div class="sb-logo">
         <img src="/logo.png" alt="SLAC" />
-        <span class="sb-logo-text">SLAC</span>
+        <span class="sb-logo-text" v-show="!collapsed">SLAC</span>
+        <button class="sb-collapse-btn" @click="collapsed = !collapsed" :title="collapsed ? 'Expandir menu' : 'Recolher menu'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline v-if="!collapsed" points="15 18 9 12 15 6"/>
+            <polyline v-else points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
       </div>
 
       <!-- Nav principal -->
       <nav class="sb-nav">
         <div class="sb-section">
-          <span class="sb-label">Principal</span>
+          <span class="sb-label" v-show="!collapsed">Principal</span>
 
-          <button class="sb-item" :class="{ active: route.path === '/dashboard' }" @click="go('/dashboard')">
+          <button class="sb-item" :class="{ active: route.path === '/dashboard' }" @click="go('/dashboard')" :title="collapsed ? 'Dashboard' : ''">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
               <rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
             </svg>
-            <span>Dashboard</span>
+            <span v-show="!collapsed">Dashboard</span>
           </button>
 
-          <button class="sb-item" :class="{ active: route.path === '/crm' }" @click="go('/crm')">
+          <button class="sb-item" :class="{ active: route.path === '/crm' }" @click="go('/crm')" :title="collapsed ? 'CRM' : ''">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
               <circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
               <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
-            <span>CRM</span>
+            <span v-show="!collapsed">CRM</span>
           </button>
 
-          <button class="sb-item" :class="{ active: route.path === '/financeiro' }" @click="go('/financeiro')">
+          <button class="sb-item" :class="{ active: route.path === '/financeiro' }" @click="go('/financeiro')" :title="collapsed ? 'Financeiro' : ''">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <line x1="12" y1="1" x2="12" y2="23"/>
               <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
             </svg>
-            <span>Financeiro</span>
+            <span v-show="!collapsed">Financeiro</span>
           </button>
 
-          <button class="sb-item" :class="{ active: route.path === '/recorrencias' }" @click="go('/recorrencias')">
+          <button class="sb-item" :class="{ active: route.path === '/recorrencias' }" @click="go('/recorrencias')" :title="collapsed ? 'Recorrências' : ''">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
               <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
             </svg>
-            <span>Recorrências</span>
+            <span v-show="!collapsed">Recorrências</span>
           </button>
 
-          <button class="sb-item" :class="{ active: route.path === '/mapa' }" @click="go('/mapa')">
+          <button class="sb-item" :class="{ active: route.path === '/mapa' }" @click="go('/mapa')" :title="collapsed ? 'Mapa Mental' : ''">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
               <line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>
             </svg>
-            <span>Mapa Mental</span>
+            <span v-show="!collapsed">Mapa Mental</span>
           </button>
         </div>
 
         <div class="sb-section">
-          <span class="sb-label">Ferramentas</span>
-          <button class="sb-item" :class="{ active: route.path === '/prospeccao' }" @click="go('/prospeccao')">
+          <span class="sb-label" v-show="!collapsed">Ferramentas</span>
+          <button class="sb-item" :class="{ active: route.path === '/prospeccao' }" @click="go('/prospeccao')" :title="collapsed ? 'Prospecção' : ''">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
               <circle cx="9" cy="7" r="4"/>
               <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
             </svg>
-            <span>Prospecção</span>
+            <span v-show="!collapsed">Prospecção</span>
           </button>
         </div>
       </nav>
@@ -83,25 +89,26 @@
             <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
             <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
           </svg>
-          <span>{{ isDark ? 'Modo claro' : 'Modo escuro' }}</span>
+          <span v-show="!collapsed">{{ isDark ? 'Modo claro' : 'Modo escuro' }}</span>
         </button>
 
         <!-- Usuário -->
-        <div class="sb-user">
+        <div class="sb-user" v-show="!collapsed">
           <div class="avatar avatar-sm">{{ userInitial }}</div>
           <span class="sb-user-name">{{ auth.userName }}</span>
           <span class="badge badge-accent" style="font-size:0.6rem;padding:0.15rem 0.4rem;flex-shrink:0">PRO</span>
         </div>
+        <div class="avatar avatar-sm" v-show="collapsed" style="margin:0 auto">{{ userInitial }}</div>
 
-        <button class="sb-logout" @click="auth.logout()">
+        <button class="sb-logout" @click="auth.logout()" :title="collapsed ? 'Sair' : ''">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
             <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
           </svg>
-          Sair
+          <span v-show="!collapsed">Sair</span>
         </button>
 
-        <div class="sb-dev">Desenvolvido por Sano Lab</div>
+        <div class="sb-dev" v-show="!collapsed">Desenvolvido por Sano Lab</div>
       </div>
     </aside>
 
@@ -183,7 +190,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useAppInit } from '@/composables/useAppInit'
@@ -195,6 +202,9 @@ const auth = useAuthStore()
 
 const { theme, toggleTheme } = useTheme()
 const isDark = computed(() => theme.value === 'dark')
+
+const collapsed = ref(localStorage.getItem('slac-sidebar') === 'collapsed')
+watch(collapsed, v => localStorage.setItem('slac-sidebar', v ? 'collapsed' : 'expanded'))
 
 const userInitial = computed(() => (auth.userName || '?').charAt(0).toUpperCase())
 
@@ -234,6 +244,52 @@ function go(path) {
   background: var(--bg-base);
 }
 
+/* ── Sidebar colapsável ── */
+.sidebar-collapsed .sidebar {
+  width: 56px;
+  min-width: 56px;
+}
+
+.sidebar-collapsed .sidebar .sb-item {
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.sidebar-collapsed .sidebar .sb-footer {
+  align-items: center;
+}
+
+.sidebar-collapsed .sidebar .theme-toggle {
+  justify-content: center;
+  padding: 0.4rem;
+}
+
+.sidebar-collapsed .sidebar .sb-logout {
+  justify-content: center;
+  padding: 0.4rem;
+}
+
+.sb-collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid var(--border-default);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: auto;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+.sb-collapse-btn:hover {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 /* ── Sidebar ── */
 .sidebar {
   width: var(--sidebar-width);
@@ -248,6 +304,8 @@ function go(path) {
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 100;
+  transition: width 200ms ease, min-width 200ms ease;
+  will-change: width;
 }
 
 .sb-logo {
