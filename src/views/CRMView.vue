@@ -456,6 +456,12 @@ function salvarHistorico(id, de, para) {
 async function salvar() {
   if (!form.value.nome || !form.value.telefone) { toast('Nome e telefone obrigatórios', 'err'); return }
 
+  // Captura ANTES do upsert se o lead já era fechado
+  const eraFechado = currentLeadId.value
+    ? leads.getById(currentLeadId.value)?.etapa === 'fechado'
+    : false
+  const vaiFicarFechado = form.value.etapa === 'fechado'
+
   // Salvar histórico de etapa
   if (currentLeadId.value) {
     const l = leads.getById(currentLeadId.value)
@@ -484,14 +490,11 @@ async function salvar() {
 
   await run(() => leads.upsert(payload), 'Salvo ✓')
 
-  // Se foi para "fechado", abre modal de fechamento sem fechar o drawer ainda
-  const leadAtual = leads.getById(payload.id)
-  const eraFechado = currentLeadId.value && leads.getById(currentLeadId.value)?.etapa === 'fechado'
-  if (form.value.etapa === 'fechado' && !eraFechado) {
-    fecharLead.value = leadAtual || payload
+  // Abre modal de fechamento se está indo para "fechado" pela primeira vez
+  if (vaiFicarFechado && !eraFechado) {
+    fecharLead.value = leads.getById(payload.id) || payload
     fecharOpen.value = true
-    // Não fecha o drawer — fechar só depois do modal
-    return
+    return // não fecha o drawer ainda
   }
 
   closeDrawer()
