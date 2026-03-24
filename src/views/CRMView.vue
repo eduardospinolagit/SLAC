@@ -57,6 +57,7 @@
               v-for="l in byEtapa(e.id)"
               :key="l.id"
               class="kb-card"
+              :style="l.needs_followup ? 'border-color:#f59e0b;box-shadow:0 0 0 1px rgba(245,158,11,.3)' : ''"
               @click="openLead(l.id)"
             >
               <div class="kb-card-name">{{ l.nome }}</div>
@@ -208,6 +209,17 @@
         </div>
         <div class="drawer-field"><label>Valor estimado (R$)</label><input v-model.number="form.valor_estimado" type="number" placeholder="797" min="0" /></div>
         <div class="drawer-field"><label>Próximo follow-up</label><input v-model="form.proximo_followup" type="date" /></div>
+        <div class="drawer-field" style="flex-direction:row;align-items:center;gap:10px;margin-top:4px">
+          <input
+            id="cb-followup"
+            v-model="form.needs_followup"
+            type="checkbox"
+            style="width:16px;height:16px;accent-color:var(--a);cursor:pointer;flex-shrink:0"
+          />
+          <label for="cb-followup" style="font-size:.82rem;color:#fbbf24;cursor:pointer;font-weight:500;text-transform:none;letter-spacing:0">
+            ⚡ Marcar como precisa de follow-up
+          </label>
+        </div>
       </div>
 
       <!-- Notas -->
@@ -339,7 +351,7 @@ const convMsg = ref('')
 const form = ref({
   nome: '', negocio: '', telefone: '', categoria: '',
   cidade: '', instagram: '', site_atual: '', etapa: 'contato',
-  prioridade: 'media', valor_estimado: '', proximo_followup: '', notas: ''
+  prioridade: 'media', valor_estimado: '', proximo_followup: '', notas: '', needs_followup: false
 })
 
 // Computed
@@ -410,7 +422,7 @@ function openNew(etapa = 'contato') {
   script.value = ''
   histEtapas.value = []
   leads.conversas = []
-  form.value = { nome:'', negocio:'', telefone:'', categoria:'', cidade:'', instagram:'', site_atual:'', etapa, prioridade:'media', valor_estimado:'', proximo_followup:'', notas:'' }
+  form.value = { nome:'', negocio:'', telefone:'', categoria:'', cidade:'', instagram:'', site_atual:'', etapa, prioridade:'media', valor_estimado:'', proximo_followup:'', notas:'', needs_followup: false }
   drawerOpen.value = true
 }
 function openNewEtapa(etapa) { openNew(etapa) }
@@ -426,7 +438,7 @@ async function openLead(id) {
     categoria: l.categoria || '', cidade: l.cidade || '', instagram: l.instagram || '',
     site_atual: l.site_atual || '', etapa: l.etapa || 'contato',
     prioridade: l.prioridade || 'media', valor_estimado: l.valor_estimado || '',
-    proximo_followup: l.proximo_followup || '', notas: l.notas || ''
+    proximo_followup: l.proximo_followup || '', notas: l.notas || '', needs_followup: l.needs_followup || false
   }
   // Histórico de etapas do localStorage
   try {
@@ -485,6 +497,7 @@ async function salvar() {
     valor_estimado: parseFloat(form.value.valor_estimado) || 0,
     proximo_followup: form.value.proximo_followup || null,
     notas: form.value.notas,
+    needs_followup: form.value.needs_followup || false,
     updated_at: new Date().toISOString()
   }
 

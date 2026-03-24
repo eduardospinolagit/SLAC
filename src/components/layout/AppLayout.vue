@@ -2,9 +2,8 @@
   <div class="layout">
     <!-- SIDEBAR DESKTOP -->
     <aside class="sidebar">
-      <div class="sb-logo">
-        <img src="/logo.png" alt="Sano Lab" style="height:36px;width:auto;display:block;margin-bottom:6px" />
-        <div class="sub">Sano Lab Advanced CRM</div>
+      <div class="sb-logo" style="padding:16px 20px">
+        <img src="/logo.png" alt="Sano Lab" style="height:52px;width:auto;display:block;filter:invert(1) brightness(2)" />
       </div>
 
       <div class="sb-sec">
