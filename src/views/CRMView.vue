@@ -438,7 +438,19 @@ const listaFiltrada = computed(() => {
   return lista
 })
 
-function byEtapa(etapa) { return leads.leads.filter(l => l.etapa === etapa) }
+// Computed cacheado — agrupa leads por etapa uma vez, evita filter em cada render
+const leadsByEtapa = computed(() => {
+  const map = {}
+  for (const l of leads.leads) {
+    if (!map[l.etapa]) map[l.etapa] = []
+    map[l.etapa].push(l)
+  }
+  return map
+})
+function byEtapa(etapa) { return leadsByEtapa.value[etapa] || [] }
+
+// Set de IDs com followup — evita .find() em cada card
+const followupIds = computed(() => new Set(leads.leads.filter(l => l.needs_followup).map(l => l.id)))
 
 const ETAPA_LABEL = { contato:'Contato', interesse:'Interesse', demo:'Demo enviada', negociacao:'Negociação', fechado:'Fechado', perdido:'Perdido' }
 const ETAPA_COLOR = { contato:'#3b82f6', interesse:'#f59e0b', demo:'#8b5cf6', negociacao:'#f97316', fechado:'#22c55e', perdido:'#6b7280' }
@@ -447,7 +459,7 @@ const PRI_COLOR   = { alta:'#ef4444', media:'#f59e0b', baixa:'#3b82f6' }
 function etapaLabel(e)  { return ETAPA_LABEL[e] || e }
 function etapaColor(e)  { return ETAPA_COLOR[e] || '#6b7280' }
 function priColor(p)    { return PRI_COLOR[p] || '#9ca3af' }
-function getFU(id)      { return leads.leads.find(l => l.id === id)?.needs_followup || false }
+function getFU(id)      { return followupIds.value.has(id) }
 function fmtData(d)     { return new Date(d).toLocaleDateString('pt-BR') }
 function fmtDataHora(d) { return new Date(d).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) }
 
@@ -621,11 +633,10 @@ onMounted(() => {
 <style scoped>
 .crm-page {
   padding: 2rem 2rem 3rem;
-  max-width: 1600px;
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  min-width: 0;
 }
 
 /* Total badge no título */
@@ -700,8 +711,12 @@ onMounted(() => {
   display: flex;
   gap: 1rem;
   overflow-x: auto;
-  padding-bottom: 1rem;
+  padding: 0 0 1rem 0;
   min-height: 480px;
+  /* Permite scroll sem cortar sombras dos cards */
+  margin: 0 -2rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
 }
 .kanban-col {
   min-width: 260px;
