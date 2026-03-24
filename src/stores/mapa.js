@@ -82,7 +82,10 @@ export const useMapaStore = defineStore('mapa', () => {
 
   function uid() {
     const auth = useAuthStore()
-    if (!auth.user?.id) throw new Error('Usuário não autenticado')
+    if (!auth.user?.id) {
+      console.error('[SLAC] uid() chamado sem usuário autenticado. auth.user =', auth.user)
+      throw new Error('Usuário não autenticado')
+    }
     return auth.user.id
   }
 

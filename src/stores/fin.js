@@ -13,7 +13,10 @@ export const useFinStore = defineStore('fin', () => {
   // Pega o user dinamicamente — nunca fica null por timing
   function uid() {
     const auth = useAuthStore()
-    if (!auth.user?.id) throw new Error('Usuário não autenticado')
+    if (!auth.user?.id) {
+      console.error('[SLAC] uid() chamado sem usuário autenticado. auth.user =', auth.user)
+      throw new Error('Usuário não autenticado')
+    }
     return auth.user.id
   }
 

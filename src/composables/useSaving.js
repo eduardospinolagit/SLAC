@@ -11,22 +11,29 @@ export function useSaving() {
       if (successMsg) toast(successMsg, 'ok')
       return result
     } catch (e) {
-      console.error('[useSaving] erro:', e)
-      // Mostra erro específico do Supabase se houver
-      const msg = e?.message || e?.error_description || errorMsg
-      toast(msg.includes('fetch') ? 'Sem conexão — tente novamente' : errorMsg + ': ' + msg, 'err')
-      throw e
+      // Log detalhado sempre visível
+      console.error('[SLAC] Erro ao salvar:')
+      console.error('  mensagem:', e?.message)
+      console.error('  código:', e?.code)
+      console.error('  detalhes:', e?.details)
+      console.error('  objeto completo:', e)
+
+      const msg = e?.message || errorMsg
+      if (msg.includes('não autenticado') || msg.includes('not authenticated') || msg.includes('JWT')) {
+        toast('Sessão expirada — faça login novamente', 'err')
+      } else {
+        toast(errorMsg + (msg ? ': ' + msg : ''), 'err')
+      }
     } finally {
       hideSaving()
     }
   }
 
-  // Versão que não lança exceção — útil para operações em background
   async function runSilent(fn) {
     try {
       return await fn()
     } catch (e) {
-      console.error('[useSaving silent] erro:', e)
+      console.error('[SLAC silent] erro:', e)
     }
   }
 
