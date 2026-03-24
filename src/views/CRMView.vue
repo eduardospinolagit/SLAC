@@ -203,13 +203,10 @@
   </div>
 
   <!-- DRAWER BACKDROP -->
-  <Transition name="fade">
-    <div v-if="drawerOpen" class="drawer-backdrop" @click="closeDrawer"></div>
-  </Transition>
+  <div v-show="drawerOpen" class="drawer-backdrop" @click="closeDrawer"></div>
 
   <!-- DRAWER LEAD -->
-  <Transition name="drawer-slide">
-    <div v-if="drawerOpen" class="drawer">
+  <div v-show="drawerOpen" class="drawer">
       <div class="drawer-header">
         <h3 class="drawer-title">{{ drawerTitle }}</h3>
         <button class="btn btn-ghost btn-icon" @click="closeDrawer">
