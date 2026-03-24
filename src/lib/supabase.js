@@ -7,5 +7,9 @@ export const sb = createClient(SUPA_URL, SUPA_KEY, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
+    // Desativa o lock de storage — resolve o bug de aba inativa
+    lock: async (name, acquireTimeout, fn) => {
+      return await fn()
+    }
   }
 })
