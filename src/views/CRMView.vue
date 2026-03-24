@@ -298,7 +298,7 @@
     <div style="padding:0 18px 14px">
       <button class="notif-btn" @click="pedirNotificacao">
         <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        Ativar alertas de follow-up
+        {{ push.status.value === 'granted' ? '🔔 Notificações ativas — clique para desativar' : '🔕 Ativar notificações' }}
       </button>
     </div>
   </div>
@@ -319,11 +319,13 @@ import { useAuthStore } from '@/stores/auth'
 import { useFinStore } from '@/stores/fin'
 import { useSaving } from '@/composables/useSaving'
 import { useRealtime } from '@/composables/useRealtime'
+import { usePushNotifications } from '@/composables/usePushNotifications'
 
 const leads = useLeadsStore()
 const auth = useAuthStore()
 const fin = useFinStore()
 const { run, toast } = useSaving()
+const push = usePushNotifications()
 const fmt = fin.fmt
 
 // State
@@ -560,10 +562,16 @@ function onNegocioFechado() {
 }
 
 async function pedirNotificacao() {
-  if (!('Notification' in window)) { toast('Notificações não suportadas', 'err'); return }
-  const perm = await Notification.requestPermission()
-  if (perm === 'granted') toast('Notificações ativadas ✓', 'ok')
-  else toast('Permissão negada', 'err')
+  if (!push.isSupported()) { toast('Notificações não suportadas neste browser', 'err'); return }
+  const current = await push.getSubscriptionStatus()
+  if (current === 'granted') {
+    await push.unsubscribe()
+    toast('Notificações desativadas', 'info')
+    return
+  }
+  const ok = await push.subscribe()
+  if (ok) toast('✓ Notificações ativadas! Você receberá alertas diários às 8h', 'ok')
+  else toast('Permissão negada ou erro ao ativar', 'err')
 }
 
 // Realtime
