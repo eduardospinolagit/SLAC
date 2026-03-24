@@ -381,7 +381,7 @@ watch(theme, () => {
 
 <style scoped>
 .dash-page {
-  padding: 2rem 2rem 3rem;
+  padding: 1.25rem 1.5rem 2.5rem;
   max-width: 1400px;
   margin: 0 auto;
   display: flex;
@@ -392,7 +392,7 @@ watch(theme, () => {
 /* KPI grids */
 .kpi-grid {
   display: grid;
-  gap: 1rem;
+  gap: .75rem;
 }
 .kpi-grid--5 { grid-template-columns: repeat(5, 1fr); }
 .kpi-grid--4 { grid-template-columns: repeat(4, 1fr); }

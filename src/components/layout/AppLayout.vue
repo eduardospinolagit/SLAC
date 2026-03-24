@@ -2,14 +2,10 @@
   <div class="layout" :class="{ 'sb-col': collapsed }">
 
     <aside class="sidebar">
-      <!-- Topo -->
+      <!-- Topo: logo clicável para colapsar -->
       <div class="sb-top">
-        <img src="/logo.png" alt="SLAC" class="sb-logo-img" />
-        <button class="sb-toggle" @click="toggle" :title="collapsed ? 'Expandir' : 'Recolher'">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline v-if="collapsed" points="9 18 15 12 9 6"/>
-            <polyline v-else points="15 18 9 12 15 6"/>
-          </svg>
+        <button class="sb-logo-btn" @click="toggle" :title="collapsed ? 'Expandir menu' : 'Recolher menu'">
+          <img src="/logo.png" alt="SLAC" class="sb-logo-img" />
         </button>
       </div>
 
@@ -40,14 +36,14 @@
       <div class="sb-footer">
         <button class="sb-item" @click="toggleTheme" :title="isDark ? 'Modo claro' : 'Modo escuro'">
           <span class="sb-icon">
-            <svg v-if="isDark" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <svg v-if="isDark" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="5"/>
               <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
               <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
               <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
               <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
             </svg>
-            <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
             </svg>
           </span>
@@ -55,16 +51,16 @@
         </button>
 
         <div class="sb-user">
-          <div class="avatar avatar-sm">{{ userInitial }}</div>
+          <div class="avatar avatar-sm sb-avatar">{{ userInitial }}</div>
           <div class="sb-user-info">
             <span class="sb-user-name">{{ auth.userName }}</span>
-            <span class="badge badge-accent" style="font-size:.6rem;padding:.1rem .4rem;width:fit-content">PRO</span>
+            <span class="sb-pro-badge">PRO</span>
           </div>
         </div>
 
         <button class="sb-item sb-item--danger" @click="auth.logout()" title="Sair">
           <span class="sb-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
               <polyline points="16 17 21 12 16 7"/>
               <line x1="21" y1="12" x2="9" y2="12"/>
@@ -93,11 +89,10 @@
     </button>
     <button class="mob-item" @click="toggleTheme">
       <span>
-        <svg v-if="isDark" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <svg v-if="isDark" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
         </svg>
-        <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
         </svg>
       </span>
@@ -148,12 +143,12 @@ function toggle() {
 const userInitial = computed(() => (auth.userName || '?').charAt(0).toUpperCase())
 
 const icons = {
-  dashboard:    `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>`,
-  crm:          `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
-  financeiro:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
-  recorrencias: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`,
-  mapa:         `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>`,
-  prospeccao:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`,
+  dashboard:    `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>`,
+  crm:          `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+  financeiro:   `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
+  recorrencias: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`,
+  mapa:         `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>`,
+  prospeccao:   `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`,
 }
 
 const mainNav = [
@@ -207,8 +202,8 @@ function go(path) { router.push(path) }
 
 /* ── Sidebar ── */
 .sidebar {
-  width: 220px;
-  min-width: 220px;
+  width: 210px;
+  min-width: 210px;
   background: var(--sidebar-bg);
   border-right: 1px solid var(--sidebar-border);
   display: flex;
@@ -218,114 +213,110 @@ function go(path) { router.push(path) }
   top: 0;
   overflow: hidden;
   z-index: 100;
-  transition: width 240ms cubic-bezier(.4,0,.2,1), min-width 240ms cubic-bezier(.4,0,.2,1);
+  transition: width 280ms cubic-bezier(.4,0,.2,1), min-width 280ms cubic-bezier(.4,0,.2,1);
 }
-.sb-col .sidebar { width: 64px; min-width: 64px; }
+.sb-col .sidebar { width: 56px; min-width: 56px; }
 
-/* Topo */
+/* Topo — logo clicável */
 .sb-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 1rem .75rem;
+  justify-content: center;
+  padding: .875rem .75rem;
   border-bottom: 1px solid var(--border-subtle);
-  gap: .5rem;
-  min-height: 62px;
+  min-height: 58px;
   flex-shrink: 0;
 }
-.sb-col .sb-top { justify-content: center; flex-direction: column; gap: .75rem; padding: .875rem .5rem; }
 
-.sb-logo-img {
-  height: 36px;
-  width: auto;
-  object-fit: contain;
-  flex-shrink: 0;
-  transition: height 240ms ease;
-}
-.sb-col .sb-logo-img { height: 30px; }
-
-.sb-toggle {
+.sb-logo-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  border: 1px solid var(--border-default);
-  color: var(--text-tertiary);
+  background: none;
+  border: none;
   cursor: pointer;
-  flex-shrink: 0;
-  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+  padding: .25rem;
+  border-radius: var(--radius-md);
+  transition: opacity 150ms ease, transform 150ms ease;
 }
-.sb-toggle:hover { background: var(--accent-subtle); color: var(--accent); border-color: var(--accent); }
-.sb-col .sb-toggle { width: 30px; height: 30px; }
+.sb-logo-btn:hover { opacity: .75; transform: scale(.95); }
+.sb-logo-btn:active { transform: scale(.9); }
+
+.sb-logo-img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  /* Animação iOS: pulsa levemente ao clicar */
+  transition: transform 280ms cubic-bezier(.34,1.56,.64,1);
+}
+.sb-col .sb-logo-img { transform: rotate(0deg); }
 
 /* Nav */
 .sb-nav {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: .5rem 0;
+  padding: .375rem 0;
   display: flex;
   flex-direction: column;
 }
-.sb-group { padding: 0 .5rem; margin-bottom: .25rem; }
+.sb-group { padding: 0 .5rem; margin-bottom: .125rem; }
 .sb-col .sb-group { padding: 0 .375rem; }
 
 .sb-group-label {
   display: block;
-  font-size: .65rem;
+  font-size: .6rem;
   font-weight: 700;
   letter-spacing: .1em;
   text-transform: uppercase;
   color: var(--text-tertiary);
-  padding: .5rem .5rem .25rem;
+  padding: .4rem .5rem .2rem;
   white-space: nowrap;
   overflow: hidden;
   opacity: 1;
-  max-height: 30px;
-  transition: opacity 180ms ease, max-height 240ms ease, padding 240ms ease;
+  max-height: 28px;
+  transition: opacity 200ms ease, max-height 280ms ease, padding 280ms ease;
 }
 .sb-col .sb-group-label { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; }
 
 .sb-item {
   display: flex;
   align-items: center;
-  gap: .75rem;
+  gap: .625rem;
   width: 100%;
-  padding: .5rem .625rem;
+  padding: .45rem .625rem;
   border-radius: var(--radius-md);
   background: transparent;
   border: none;
   color: var(--text-secondary);
   font-family: var(--font-body);
-  font-size: .875rem;
+  font-size: .8125rem;
   font-weight: 500;
   cursor: pointer;
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
-  transition: background-color 120ms ease, color 120ms ease, padding 240ms ease;
+  transition: background-color 120ms ease, color 120ms ease, padding 280ms ease;
 }
 .sb-item:hover { background: var(--accent-subtle); color: var(--accent); }
 .sb-item:hover .sb-icon { opacity: 1; }
 .sb-item.active { background: var(--accent-subtle); color: var(--accent); font-weight: 600; }
 .sb-item.active .sb-icon { opacity: 1; }
 .sb-item--danger:hover { background: var(--status-danger-subtle); color: var(--status-danger); }
-.sb-col .sb-item { justify-content: center; padding: .625rem .5rem; gap: 0; }
+.sb-col .sb-item { justify-content: center; padding: .55rem; gap: 0; }
 
 .sb-icon {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  opacity: .5;
+  width: 18px;
+  height: 18px;
+  opacity: .45;
   transition: opacity 120ms ease;
 }
-.sb-col .sb-icon { opacity: .65; }
+.sb-col .sb-icon { opacity: .6; }
 .sb-col .sb-item:hover .sb-icon,
 .sb-col .sb-item.active .sb-icon { opacity: 1; }
 
@@ -334,14 +325,14 @@ function go(path) { router.push(path) }
   overflow: hidden;
   text-overflow: ellipsis;
   opacity: 1;
-  max-width: 160px;
-  transition: opacity 180ms ease, max-width 240ms ease;
+  max-width: 150px;
+  transition: opacity 200ms ease, max-width 280ms ease;
 }
 .sb-col .sb-label { opacity: 0; max-width: 0; pointer-events: none; }
 
 /* Footer */
 .sb-footer {
-  padding: .5rem .5rem .875rem;
+  padding: .375rem .5rem .75rem;
   border-top: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
@@ -349,48 +340,68 @@ function go(path) { router.push(path) }
   flex-shrink: 0;
 }
 
+/* Usuário — alinhamento correto */
 .sb-user {
   display: flex;
   align-items: center;
-  gap: .625rem;
-  padding: .5rem .625rem;
+  gap: .5rem;
+  padding: .375rem .625rem;
   border-radius: var(--radius-md);
   overflow: hidden;
-  min-height: 44px;
+  min-height: 40px;
 }
-.sb-col .sb-user { justify-content: center; padding: .5rem; }
+.sb-col .sb-user { justify-content: center; padding: .375rem; }
+
+.sb-avatar {
+  flex-shrink: 0;
+  align-self: center;
+}
 
 .sb-user-info {
   display: flex;
   flex-direction: column;
-  gap: .2rem;
+  justify-content: center;
+  gap: .15rem;
   min-width: 0;
   opacity: 1;
-  max-width: 160px;
-  transition: opacity 180ms ease, max-width 240ms ease;
+  max-width: 150px;
+  transition: opacity 200ms ease, max-width 280ms ease;
 }
 .sb-col .sb-user-info { opacity: 0; max-width: 0; pointer-events: none; }
 
 .sb-user-name {
-  font-size: .8rem;
+  font-size: .78rem;
   font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.2;
+  line-height: 1.3;
+}
+
+.sb-pro-badge {
+  display: inline-block;
+  font-size: .58rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  background: var(--accent-subtle);
+  color: var(--accent);
+  border-radius: var(--radius-full);
+  padding: .1rem .4rem;
+  width: fit-content;
+  line-height: 1.4;
 }
 
 .sb-dev {
-  font-size: .65rem;
+  font-size: .6rem;
   color: var(--text-tertiary);
   text-align: center;
-  opacity: .45;
+  opacity: .4;
   padding-top: .25rem;
   white-space: nowrap;
   overflow: hidden;
-  max-height: 20px;
-  transition: opacity 180ms ease, max-height 240ms ease;
+  max-height: 18px;
+  transition: opacity 200ms ease, max-height 280ms ease;
 }
 .sb-col .sb-dev { opacity: 0; max-height: 0; }
 
@@ -419,13 +430,13 @@ function go(path) { router.push(path) }
   border: none;
   color: var(--text-tertiary);
   font-family: var(--font-body);
-  font-size: .65rem;
+  font-size: .6rem;
   font-weight: 500;
-  padding: .4rem .5rem;
+  padding: .375rem .5rem;
   cursor: pointer;
   border-radius: var(--radius-md);
   transition: color 120ms ease;
-  min-width: 48px;
+  min-width: 44px;
 }
 .mob-item.active, .mob-item:hover { color: var(--accent); }
 

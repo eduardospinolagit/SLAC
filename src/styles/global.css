@@ -33,13 +33,13 @@
   --accent-glow:    rgba(34, 197, 94, 0.15);
   --accent-subtle:  rgba(34, 197, 94, 0.08);
 
-  /* Status */
-  --status-warning: #f59e0b;
-  --status-warning-subtle: rgba(245, 158, 11, 0.1);
-  --status-danger:  #ef4444;
-  --status-danger-subtle: rgba(239, 68, 68, 0.1);
-  --status-info:    #3b82f6;
-  --status-info-subtle: rgba(59, 130, 246, 0.1);
+  /* Status — tons refinados */
+  --status-warning: #e8a838;
+  --status-warning-subtle: rgba(232, 168, 56, 0.1);
+  --status-danger:  #e05555;
+  --status-danger-subtle: rgba(224, 85, 85, 0.1);
+  --status-info:    #5b8dee;
+  --status-info-subtle: rgba(91, 141, 238, 0.1);
 
   /* Kanban columns */
   --kanban-novo:       #3b82f6;
@@ -627,10 +627,10 @@ tbody tr:hover td {
   background: var(--bg-elevated);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
-  padding: 1.25rem 1.5rem;
+  padding: 1rem 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
   transition:
     background-color var(--transition-slow),
     border-color var(--transition-base),
@@ -643,20 +643,20 @@ tbody tr:hover td {
 }
 
 .kpi-label {
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--text-tertiary);
 }
 
 .kpi-value {
   font-family: var(--font-display);
-  font-size: 1.75rem;
-  font-weight: 800;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: var(--text-primary);
   line-height: 1;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.025em;
 }
 
 .kpi-value--accent { color: var(--accent); }
