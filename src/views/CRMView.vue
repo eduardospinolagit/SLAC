@@ -290,10 +290,18 @@
       </button>
     </div>
   </div>
+
+  <!-- Modal fechar negócio -->
+  <FecharNegocioModal
+    v-model="fecharOpen"
+    :lead="fecharLead"
+    @fechado="onNegocioFechado"
+  />
 </template>
 
 <script setup>
 import { ref, computed, inject, onMounted } from 'vue'
+import FecharNegocioModal from '@/components/crm/FecharNegocioModal.vue'
 import { useLeadsStore, ETAPAS } from '@/stores/leads'
 import { useAuthStore } from '@/stores/auth'
 import { useFinStore } from '@/stores/fin'
@@ -313,6 +321,10 @@ const filterEtapa = ref('')
 const filterPri = ref('')
 const selected = ref(new Set())
 const selEtapa = ref('')
+
+// Modal fechar negócio
+const fecharOpen = ref(false)
+const fecharLead = ref(null)
 
 // Drawer
 const drawerOpen = ref(false)
@@ -471,6 +483,17 @@ async function salvar() {
   }
 
   await run(() => leads.upsert(payload), 'Salvo ✓')
+
+  // Se foi para "fechado", abre modal de fechamento sem fechar o drawer ainda
+  const leadAtual = leads.getById(payload.id)
+  const eraFechado = currentLeadId.value && leads.getById(currentLeadId.value)?.etapa === 'fechado'
+  if (form.value.etapa === 'fechado' && !eraFechado) {
+    fecharLead.value = leadAtual || payload
+    fecharOpen.value = true
+    // Não fecha o drawer — fechar só depois do modal
+    return
+  }
+
   closeDrawer()
 }
 
@@ -511,6 +534,12 @@ function gerarScript() {
     perdido: `Oi ${nome}, tudo bem?\n\nSei que o momento pode não ter sido ideal. Quando quiser retomar, estarei por aqui.\n\nGuardo sua indicação com carinho — qualquer necessidade, é só chamar!`
   }
   script.value = scripts[etapa] || 'Script não disponível para esta etapa.'
+}
+
+function onNegocioFechado() {
+  closeDrawer()
+  fecharOpen.value = false
+  fecharLead.value = null
 }
 
 async function pedirNotificacao() {
