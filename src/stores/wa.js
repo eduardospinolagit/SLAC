@@ -68,12 +68,15 @@ export const useWaStore = defineStore('wa', () => {
       body: { lead_id: leadId, user_id: userId, telefone, mensagem }
     })
     if (error) {
-      // Tenta extrair corpo da resposta de erro
       let detail = error.message
-      try { const ctx = await error.context?.json?.(); detail = ctx?.error || ctx?.detail || error.message } catch {}
+      try {
+        const text = await error.context?.text?.()
+        const parsed = text ? JSON.parse(text) : null
+        detail = parsed?.detail || parsed?.error || text || error.message
+      } catch {}
       throw new Error(detail)
     }
-    if (!data?.ok) throw new Error(data?.error || data?.detail || 'Falha ao enviar')
+    if (!data?.ok) throw new Error(data?.detail || data?.error || 'Falha ao enviar')
     return data
   }
 
