@@ -194,9 +194,7 @@
                     @click="marcarContato(r._id)">
                     Contatei
                   </button>
-                  <button class="btn btn-ghost btn-icon btn-sm" title="Histórico" @click="abrirHistorico(r)">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                  </button>
+
                   <button class="btn btn-ghost btn-icon btn-sm" style="color:var(--status-danger)" @click="excluirLead(r._id)">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
                   </button>
@@ -225,77 +223,66 @@
 
   </div>
 
-  <!-- MODO FOCO -->
-  <Transition name="modal-fade">
-    <div v-if="focoOpen" class="modal-backdrop" @click.self="focoOpen=false">
-      <div class="foco-card" :class="{ flash: focoFlash }">
-        <div class="foco-header">
-          <span class="kpi-sub">{{ focoIdx+1 }} / {{ focoLista.length }}</span>
-          <button class="btn btn-ghost btn-icon" @click="focoOpen=false">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
+  <!-- MODO FOCO — fullscreen com fundo escurecido -->
+  <Transition name="foco-fade">
+    <div v-if="focoOpen" class="foco-overlay">
+      <!-- Contador + fechar -->
+      <div class="foco-top">
+        <span class="foco-counter">{{ focoIdx+1 }} <span style="opacity:.4">/</span> {{ focoLista.length }}</span>
+        <button class="btn btn-ghost btn-sm" @click="focoOpen=false">Sair do foco</button>
+      </div>
+
+      <!-- Barra de progresso -->
+      <div class="foco-progress-bar">
+        <div class="foco-progress-fill" :style="{ width: focoPct+'%' }"></div>
+      </div>
+
+      <!-- Card central -->
+      <div v-if="focoLead" class="foco-center" :class="{ flash: focoFlash }">
+        <div class="foco-name">{{ focoLead.nome }}</div>
+        <div class="foco-details">
+          <span v-if="focoLead.categoria" class="foco-tag">{{ focoLead.categoria }}</span>
+          <span v-if="focoLead.cidade" class="foco-tag">{{ focoLead.cidade }}</span>
+          <span v-if="focoLead.site" class="foco-tag foco-tag--site">{{ focoLead.site }}</span>
         </div>
-        <div v-if="focoLead" class="foco-body">
-          <div class="foco-name">{{ focoLead.nome }}</div>
-          <div v-if="focoLead.categoria" class="foco-cat">{{ focoLead.categoria }}</div>
-          <div v-if="focoLead.cidade" class="foco-info">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            {{ focoLead.cidade }}
-          </div>
-          <a :href="'https://wa.me/55'+focoLead.telefone" target="_blank" class="foco-tel">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            {{ formatTel(focoLead.telefone) }}
-          </a>
-          <div v-if="focoLead.site" class="foco-info text-muted">{{ focoLead.site }}</div>
-        </div>
-        <div v-else class="foco-body" style="text-align:center;padding:2rem">
-          <p style="color:var(--accent);font-weight:700">Lista zerada! 🎯</p>
-        </div>
-        <div class="foco-footer">
-          <button class="btn btn-secondary" @click="focoOpen=false">Sair do foco</button>
-          <button v-if="focoLead" class="btn btn-primary" style="flex:1;justify-content:center;font-size:.9375rem"
-            :disabled="focoContatando" @click="focoMarcar">
-            ✓ Contatei
-          </button>
-        </div>
-        <div class="foco-progress">
-          <div class="foco-progress-fill" :style="{ width: focoPct+'%' }"></div>
-        </div>
+        <div class="foco-tel-big">{{ formatTel(focoLead.telefone) }}</div>
+      </div>
+      <div v-else class="foco-center">
+        <div class="foco-name" style="color:var(--accent)">🎯 Lista zerada!</div>
+        <p class="text-muted">Todos os leads foram processados.</p>
+      </div>
+
+      <!-- Ações -->
+      <div class="foco-actions">
+        <!-- Voltar -->
+        <button class="foco-btn foco-btn--nav" :disabled="focoIdx<=0" @click="focoIdx--" title="Lead anterior">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+
+        <!-- Excluir -->
+        <button class="foco-btn foco-btn--danger" @click="focoExcluir" title="Excluir lead">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+
+        <!-- WhatsApp -->
+        <a v-if="focoLead" :href="'https://wa.me/55'+focoLead.telefone" target="_blank" class="foco-btn foco-btn--wa" title="Abrir WhatsApp">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        </a>
+
+        <!-- Contatei -->
+        <button class="foco-btn foco-btn--ok" :disabled="focoContatando || !focoLead" @click="focoMarcar" title="Contatei">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+
+        <!-- Avançar -->
+        <button class="foco-btn foco-btn--nav" :disabled="focoIdx>=focoLista.length-1" @click="focoIdx++" title="Próximo lead">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
       </div>
     </div>
   </Transition>
 
-  <!-- HISTÓRICO LEAD -->
-  <Transition name="modal-fade">
-    <div v-if="histLead" class="modal-backdrop" @click.self="histLead=null">
-      <div class="hist-modal">
-        <div class="card-modal-header">
-          <div>
-            <h3 class="card-modal-name">{{ histLead.nome }}</h3>
-            <p class="card-modal-neg">{{ histLead.categoria }} {{ histLead.cidade?'· '+histLead.cidade:'' }}</p>
-          </div>
-          <button class="btn btn-ghost btn-icon" @click="histLead=null">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </div>
-        <div class="card-modal-body">
-          <div class="card-modal-grid">
-            <div v-for="item in histItems" :key="item.l" class="cm-item">
-              <span class="cm-label">{{ item.l.split(' ')[0] }}</span>
-              <span class="cm-val">{{ item.l.slice(item.l.indexOf(' ')+1) }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="card-modal-footer">
-          <a :href="'https://wa.me/55'+histLead.telefone" target="_blank" class="btn btn-secondary">WhatsApp</a>
-          <button v-if="histLead._status!=='contatado'" class="btn btn-primary" style="flex:1;justify-content:center"
-            @click="marcarContato(histLead._id);histLead=null">
-            Marcar como contatado
-          </button>
-        </div>
-      </div>
-    </div>
-  </Transition>
+
 </template>
 
 <script setup>
@@ -633,7 +620,16 @@ function sortBy(field) {
   sortField.value=field
 }
 
-function abrirHistorico(r) { histLead.value=r }
+function focoExcluir() {
+  const r = focoLead.value
+  if (!r) return
+  if (!confirm('Remover ' + r.nome + ' da lista?')) return
+  allRows.value = allRows.value.filter(x => x._id !== r._id)
+  focoLista.value = focoLista.value.filter(x => x._id !== r._id)
+  if (focoIdx.value >= focoLista.value.length) focoIdx.value = Math.max(0, focoLista.value.length - 1)
+  if (!focoLista.value.length) focoOpen.value = false
+  salvarDados()
+}
 
 function formatTel(t) {
   if(!t) return '—'
@@ -711,40 +707,114 @@ function fmtDataHora(d) {
 }
 .meta-input:focus { border-color:var(--accent); }
 
-/* Modo Foco */
-.foco-card {
-  background:var(--bg-elevated); border:1px solid var(--border-default);
-  border-radius:var(--radius-xl,16px); box-shadow:var(--shadow-lg);
-  width:100%; max-width:420px; overflow:hidden;
-  transition:border-color 300ms ease, box-shadow 300ms ease;
+/* Modo Foco — fullscreen */
+.foco-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2rem; padding: 1.5rem;
 }
-.foco-card.flash { border-color:var(--accent); box-shadow:0 0 0 4px var(--accent-subtle), var(--shadow-lg); }
-.foco-header { display:flex; align-items:center; justify-content:space-between; padding:.875rem 1.25rem; border-bottom:1px solid var(--border-subtle); }
-.foco-body   { padding:1.5rem 1.25rem; display:flex; flex-direction:column; gap:.625rem; }
-.foco-name   { font-size:1.25rem; font-weight:700; color:var(--text-primary); }
-.foco-cat    { font-size:.875rem; color:var(--text-tertiary); }
-.foco-info   { display:flex; align-items:center; gap:.375rem; font-size:.875rem; color:var(--text-secondary); }
-.foco-tel    {
-  display:inline-flex; align-items:center; gap:.5rem;
-  font-size:1rem; font-weight:600; color:var(--accent);
-  text-decoration:none; padding:.5rem .875rem;
-  background:var(--accent-subtle); border:1px solid var(--accent);
-  border-radius:var(--radius-md); width:fit-content;
+.foco-top {
+  position: absolute; top: 1.25rem; left: 0; right: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1.5rem;
 }
-.foco-footer { display:flex; align-items:center; gap:.5rem; padding:.875rem 1.25rem; border-top:1px solid var(--border-default); }
-.foco-progress { height:4px; background:var(--bg-overlay); }
-.foco-progress-fill { height:100%; background:var(--accent); transition:width 400ms ease; }
+.foco-counter {
+  font-size: .9375rem; font-weight: 700;
+  color: rgba(255,255,255,.5);
+  font-family: var(--font-display);
+}
+.foco-progress-bar {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px; background: rgba(255,255,255,.08);
+}
+.foco-progress-fill {
+  height: 100%; background: var(--accent);
+  transition: width 400ms ease;
+}
 
-/* Histórico modal */
-.hist-modal { background:var(--bg-elevated); border:1px solid var(--border-default); border-radius:var(--radius-xl,16px); box-shadow:var(--shadow-lg); width:100%; max-width:420px; overflow:hidden; }
+/* Card central */
+.foco-center {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 1rem; text-align: center;
+  padding: 2rem; max-width: 480px; width: 100%;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius-xl, 20px);
+  transition: border-color 300ms ease, box-shadow 300ms ease;
+}
+.foco-center.flash {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-subtle);
+}
+.foco-name    { font-size: 1.625rem; font-weight: 800; color: #fff; letter-spacing: -.03em; line-height: 1.2; }
+.foco-details { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; justify-content: center; }
+.foco-tag {
+  font-size: .75rem; font-weight: 500;
+  background: rgba(255,255,255,.08); color: rgba(255,255,255,.6);
+  border-radius: 99px; padding: .2rem .625rem;
+}
+.foco-tag--site { color: var(--status-info); background: var(--status-info-subtle); }
+.foco-tel-big {
+  font-size: 1.25rem; font-weight: 700;
+  color: rgba(255,255,255,.8);
+  letter-spacing: .02em;
+  font-family: var(--font-display);
+}
 
-/* Animations */
-.modal-fade-enter-active,.modal-fade-leave-active { transition:opacity 180ms ease; }
-.modal-fade-enter-from,.modal-fade-leave-to { opacity:0; }
-.modal-fade-enter-active .foco-card,
-.modal-fade-enter-active .hist-modal { transition:transform 200ms ease; }
-.modal-fade-enter-from .foco-card,
-.modal-fade-enter-from .hist-modal { transform:scale(.96) translateY(8px); }
+/* Botões de ação */
+.foco-actions {
+  display: flex; align-items: center; gap: 1rem;
+}
+.foco-btn {
+  display: flex; align-items: center; justify-content: center;
+  border: none; cursor: pointer; border-radius: 50%;
+  transition: transform 120ms ease, opacity 120ms ease, box-shadow 120ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.foco-btn:disabled { opacity: .25; cursor: not-allowed; }
+.foco-btn:not(:disabled):active { transform: scale(.9); }
+
+.foco-btn--nav {
+  width: 48px; height: 48px;
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.6);
+}
+.foco-btn--nav:not(:disabled):hover { background: rgba(255,255,255,.14); color: #fff; }
+
+.foco-btn--danger {
+  width: 48px; height: 48px;
+  background: rgba(224,85,85,.15);
+  color: var(--status-danger);
+  border: 1px solid rgba(224,85,85,.3);
+}
+.foco-btn--danger:hover { background: rgba(224,85,85,.25); }
+
+.foco-btn--wa {
+  width: 56px; height: 56px;
+  background: #25d366;
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(37,211,102,.35);
+}
+.foco-btn--wa:hover { background: #22c55e; box-shadow: 0 6px 20px rgba(37,211,102,.5); }
+
+.foco-btn--ok {
+  width: 72px; height: 72px;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(34,197,94,.4);
+}
+.foco-btn--ok:not(:disabled):hover { background: var(--accent-dim); box-shadow: 0 6px 28px rgba(34,197,94,.55); }
+
+/* Animação foco */
+.foco-fade-enter-active { transition: all 250ms ease; }
+.foco-fade-leave-active { transition: all 180ms ease; }
+.foco-fade-enter-from   { opacity: 0; }
+.foco-fade-leave-to     { opacity: 0; }
 
 @media(max-width:768px) { .map-grid{grid-template-columns:1fr 1fr;} .page-layout{padding:1rem 1rem 5rem;} }
 @media(max-width:480px) { .map-grid{grid-template-columns:1fr;} }
