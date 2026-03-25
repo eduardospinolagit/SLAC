@@ -537,16 +537,7 @@ onMounted(()=>{
 </script>
 
 <style scoped>
-.page-layout { padding:1.25rem 1.5rem 2.5rem; display:flex; flex-direction:column; gap:1.25rem; min-width:0; }
-.page-header { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
-.page-title  { font-size:1.5rem; font-weight:700; color:var(--text-primary); letter-spacing:-.025em; line-height:1.2; }
-.page-count  { font-size:.875rem; font-weight:400; color:var(--text-tertiary); margin-left:.5rem; }
-.page-subtitle { font-size:.8125rem; color:var(--text-tertiary); margin-top:.2rem; }
-.page-actions { display:flex; align-items:center; gap:.625rem; flex-wrap:wrap; }
-
-.kpi-grid { display:grid; gap:.75rem; }
-.kpi-grid--5 { grid-template-columns:repeat(5,1fr); }
-
+/* Sel bar */
 .sel-bar { display:flex; align-items:center; gap:.625rem; flex-wrap:wrap; background:var(--accent-subtle); border:1px solid var(--accent); border-radius:var(--radius-lg); padding:.625rem 1rem; }
 .sel-count { font-size:.82rem; font-weight:700; color:var(--accent); }
 .sel-bar-enter-active,.sel-bar-leave-active { transition:all 180ms ease; }
@@ -559,7 +550,7 @@ onMounted(()=>{
 .tab.active { background:var(--accent); color:#fff; }
 .tab:not(.active):hover { background:var(--bg-overlay); color:var(--text-primary); }
 
-/* Busca kanban */
+/* Busca */
 .kb-search-box { flex:1; max-width:320px; display:flex; align-items:center; gap:.5rem; background:var(--bg-elevated); border:1px solid var(--border-default); border-radius:var(--radius-full); padding:.375rem .875rem; transition:border-color 150ms ease,box-shadow 150ms ease; }
 .kb-search-box:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-subtle); }
 .kb-search-box svg { flex-shrink:0; color:var(--text-tertiary); }
@@ -577,14 +568,11 @@ onMounted(()=>{
 .kb-dot   { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
 .kb-count { font-size:.68rem; background:var(--bg-overlay); color:var(--text-tertiary); padding:.1rem .4rem; border-radius:var(--radius-full); font-weight:600; }
 .kb-cards { flex:1; padding:.5rem; display:flex; flex-direction:column; gap:.375rem; overflow-y:auto; }
-
-.kb-card { background:var(--bg-elevated); border:1px solid var(--border-default); border-radius:var(--radius-md); padding:.625rem .75rem; cursor:grab; position:relative; transition:box-shadow 120ms ease,border-color 120ms ease,opacity 120ms ease; }
+.kb-card  { background:var(--bg-elevated); border:1px solid var(--border-default); border-radius:var(--radius-md); padding:.625rem .75rem; cursor:grab; position:relative; transition:box-shadow 120ms ease,border-color 120ms ease,opacity 120ms ease; }
 .kb-card:hover { box-shadow:var(--shadow-md); border-color:var(--border-strong); }
 .kb-card:active { cursor:grabbing; opacity:.85; }
-
 .kb-drag-handle { position:absolute; top:.5rem; right:.5rem; color:var(--text-tertiary); opacity:0; transition:opacity 100ms ease; cursor:grab; }
 .kb-card:hover .kb-drag-handle { opacity:.5; }
-
 .kb-name    { font-size:.82rem; font-weight:600; color:var(--text-primary); margin-bottom:.15rem; }
 .kb-neg     { font-size:.72rem; color:var(--text-tertiary); margin-bottom:.375rem; }
 .kb-servico { font-size:.65rem; color:var(--status-info); margin-bottom:.375rem; }
@@ -619,7 +607,6 @@ onMounted(()=>{
 .drawer-section:last-child { border-bottom:none; }
 .drawer-section-title { font-size:.62rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--text-tertiary); margin:0; }
 .drawer-footer { display:flex; align-items:center; gap:.5rem; padding:.875rem 1.25rem; border-top:1px solid var(--border-default); flex-shrink:0; }
-
 .script-box { background:var(--bg-overlay); border:1px solid var(--border-default); border-radius:var(--radius-md); padding:.75rem; font-size:.8rem; color:var(--text-secondary); white-space:pre-wrap; line-height:1.6; }
 .hist-row  { display:flex; align-items:center; gap:.375rem; font-size:.78rem; color:var(--text-tertiary); }
 .hist-time { margin-left:auto; font-size:.7rem; }
@@ -638,6 +625,5 @@ onMounted(()=>{
 .conv-select-label { font-size:.6rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--text-tertiary); }
 
 @media (max-width:1200px) { .kanban-board { grid-template-columns:repeat(3,1fr); } }
-@media (max-width:1100px) { .kpi-grid--5 { grid-template-columns:repeat(3,1fr); } }
-@media (max-width:768px)  { .page-layout{padding:1rem 1rem 5rem;gap:1rem;} .kpi-grid--5{grid-template-columns:repeat(2,1fr);} .kanban-board{grid-template-columns:repeat(2,1fr);} .drawer{width:100%;} }
+@media (max-width:768px)  { .kanban-board{grid-template-columns:repeat(2,1fr);} .drawer{width:100%;} }
 </style>
