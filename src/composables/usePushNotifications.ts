@@ -34,7 +34,9 @@ export function usePushNotifications() {
 
     try {
       // Pede permissão
+      console.log('[DEBUG] pedindo permissão...')
       const perm = await Notification.requestPermission()
+      console.log('[DEBUG] permissão:', perm)
       if (perm !== 'granted') {
         status.value = 'denied'
         return false
@@ -42,9 +44,11 @@ export function usePushNotifications() {
 
       // Registra service worker
       const reg = await navigator.serviceWorker.ready
+      console.log('[DEBUG] SW ready:', reg.scope)
 
       // Cancela subscription antiga se existir
       const oldSub = await reg.pushManager.getSubscription()
+      console.log('[DEBUG] oldSub:', oldSub)
       if (oldSub) await oldSub.unsubscribe()
 
       // Cria nova subscription
