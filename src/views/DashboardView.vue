@@ -85,30 +85,6 @@
       </div>
     </div>
 
-    <!-- KPIs Progresso -->
-    <div class="sec-header"><h2 class="sec-title">Progresso</h2></div>
-    <div class="kpi-grid kpi-grid--4">
-      <div class="kpi-card">
-        <span class="kpi-label">Feito</span>
-        <span class="kpi-value kpi-value--accent">{{ mapa.stats.ok }}</span>
-        <span class="kpi-sub">{{ safePercent(mapa.stats.ok, mapa.stats.total) }}% completo</span>
-      </div>
-      <div class="kpi-card">
-        <span class="kpi-label">Em andamento</span>
-        <span class="kpi-value kpi-value--warning">{{ mapa.stats.doing }}</span>
-        <span class="kpi-sub">em progresso</span>
-      </div>
-      <div class="kpi-card">
-        <span class="kpi-label">Faltando</span>
-        <span class="kpi-value kpi-value--danger">{{ mapa.stats.nope }}</span>
-        <span class="kpi-sub">para fazer</span>
-      </div>
-      <div class="kpi-card">
-        <span class="kpi-label">Futuro</span>
-        <span class="kpi-value" style="color:var(--status-info)">{{ mapa.stats.future }}</span>
-        <span class="kpi-sub">planejado</span>
-      </div>
-    </div>
 
     <!-- KPIs CRM -->
     <div class="sec-header"><h2 class="sec-title">Prospecção</h2></div>
@@ -174,12 +150,10 @@
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useFinStore } from '@/stores/fin'
 import { useLeadsStore } from '@/stores/leads'
-import { useMapaStore } from '@/stores/mapa'
 import { useTheme } from '@/composables/useTheme'
 
 const fin   = useFinStore()
 const leads = useLeadsStore()
-const mapa  = useMapaStore()
 const fmt   = fin.fmt
 const { theme } = useTheme()
 

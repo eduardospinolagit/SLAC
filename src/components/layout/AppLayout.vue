@@ -171,13 +171,13 @@ const mainNav = [
   { path: '/crm',          label: 'CRM',          icon: icons.crm },
   { path: '/financeiro',   label: 'Financeiro',   icon: icons.financeiro },
   { path: '/recorrencias', label: 'Recorrências', icon: icons.recorrencias },
-  { path: '/mapa',         label: 'Mapa Mental',  icon: icons.mapa },
+
 ]
 const mobileNav = [
   { path: '/dashboard',  short: 'Dash',   icon: icons.dashboard },
   { path: '/crm',        short: 'CRM',    icon: icons.crm },
   { path: '/financeiro', short: 'Fin.',   icon: icons.financeiro },
-  { path: '/mapa',       short: 'Mapa',   icon: icons.mapa },
+
   { path: '/prospeccao', short: 'Prosp.', icon: icons.search },
 ]
 
@@ -189,7 +189,7 @@ const allRoutes = [
   { path: '/crm',          label: 'CRM',          desc: 'Kanban e leads',           icon: icons.crm },
   { path: '/financeiro',   label: 'Financeiro',   desc: 'Transações e pagamentos',  icon: icons.financeiro },
   { path: '/recorrencias', label: 'Recorrências', desc: 'Contratos mensais',        icon: icons.recorrencias },
-  { path: '/mapa',         label: 'Mapa Mental',  desc: 'Progresso e planejamento', icon: icons.mapa },
+
   { path: '/prospeccao',   label: 'Prospecção',   desc: 'Importar e prospectar',    icon: icons.search },
 ]
 
