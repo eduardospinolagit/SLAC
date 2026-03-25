@@ -84,6 +84,23 @@ export const useWaStore = defineStore('wa', () => {
     scriptBase.value = script
   }
 
+  async function enviarArquivo(leadId, userId, telefone, tipo, arquivo, arquivoNome, caption) {
+    const { data, error } = await sb.functions.invoke('wa-send', {
+      body: { lead_id: leadId, user_id: userId, telefone, tipo, arquivo, arquivo_nome: arquivoNome, mensagem: caption || '' }
+    })
+    if (error) {
+      let detail = error.message
+      try {
+        const text = await error.context?.text?.()
+        const parsed = text ? JSON.parse(text) : null
+        detail = parsed?.detail || parsed?.error || text || error.message
+      } catch {}
+      throw new Error(detail)
+    }
+    if (!data?.ok) throw new Error(data?.detail || data?.error || 'Falha ao enviar')
+    return data
+  }
+
   async function enviarMensagem(leadId, userId, telefone, mensagem) {
     const { data, error } = await sb.functions.invoke('wa-send', {
       body: { lead_id: leadId, user_id: userId, telefone, mensagem }
@@ -114,6 +131,6 @@ export const useWaStore = defineStore('wa', () => {
     templates, config, scriptBase, chats,
     loadTemplates, saveTemplate, deleteTemplate,
     loadConfig, saveConfig, loadChats,
-    enviarMensagem, gerarScript,
+    enviarMensagem, enviarArquivo, gerarScript,
   }
 })

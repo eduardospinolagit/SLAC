@@ -21,27 +21,50 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json()
-    const { lead_id, user_id, telefone, mensagem } = body
+    const { lead_id, user_id, telefone, mensagem, tipo = 'text', arquivo, arquivo_nome } = body
 
-    await log(sb, 'info', 'wa-send chamado', { lead_id, user_id, telefone: String(telefone).slice(-4).padStart(String(telefone).length, '*') })
+    await log(sb, 'info', 'wa-send chamado', { lead_id, user_id, tipo, telefone: String(telefone).slice(-4).padStart(String(telefone).length, '*') })
 
-    if (!lead_id || !telefone || !mensagem || !user_id) {
-      await log(sb, 'error', 'Parâmetros faltando', { lead_id, user_id, temTelefone: !!telefone, temMensagem: !!mensagem })
-      return json({ error: 'lead_id, user_id, telefone e mensagem são obrigatórios' }, 400)
+    if (!lead_id || !telefone || !user_id) {
+      return json({ error: 'lead_id, user_id e telefone são obrigatórios' }, 400)
     }
 
-    // Normaliza telefone: apenas dígitos, garante DDI 55
     const tel = String(telefone).replace(/\D/g, '')
     const telZapi = tel.startsWith('55') ? tel : '55' + tel
+    const base = `https://api.z-api.io/instances/${ZAPI_INSTANCE}/token/${ZAPI_TOKEN}`
 
-    const zapiUrl = `https://api.z-api.io/instances/${ZAPI_INSTANCE}/token/${ZAPI_TOKEN}/send-text`
-    await log(sb, 'info', 'Chamando Z-API', { url: zapiUrl.replace(ZAPI_TOKEN, '***'), phone: telZapi })
+    let zapiUrl: string
+    let zapiBody: Record<string, unknown>
+    let savedMensagem: string
 
-    // Envia pelo Z-API
+    if (tipo === 'image') {
+      if (!arquivo) return json({ error: 'arquivo é obrigatório para imagem' }, 400)
+      zapiUrl = `${base}/send-image`
+      zapiBody = { phone: telZapi, image: arquivo, caption: mensagem || '' }
+      savedMensagem = mensagem || '[Imagem]'
+    } else if (tipo === 'document') {
+      if (!arquivo) return json({ error: 'arquivo é obrigatório para documento' }, 400)
+      zapiUrl = `${base}/send-document`
+      zapiBody = { phone: telZapi, document: arquivo, fileName: arquivo_nome || 'arquivo', caption: mensagem || '' }
+      savedMensagem = `[Documento: ${arquivo_nome || 'arquivo'}]`
+    } else if (tipo === 'audio') {
+      if (!arquivo) return json({ error: 'arquivo é obrigatório para áudio' }, 400)
+      zapiUrl = `${base}/send-audio`
+      zapiBody = { phone: telZapi, audio: arquivo, ptt: true }
+      savedMensagem = '[Áudio]'
+    } else {
+      if (!mensagem) return json({ error: 'mensagem é obrigatória para texto' }, 400)
+      zapiUrl = `${base}/send-text`
+      zapiBody = { phone: telZapi, message: mensagem }
+      savedMensagem = mensagem
+    }
+
+    await log(sb, 'info', 'Chamando Z-API', { tipo, url: zapiUrl.replace(ZAPI_TOKEN, '***'), phone: telZapi })
+
     const zapiRes = await fetch(zapiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Client-Token': ZAPI_CLIENT_TOKEN },
-      body: JSON.stringify({ phone: telZapi, message: mensagem }),
+      body: JSON.stringify(zapiBody),
     })
 
     const zapiText = await zapiRes.text()
@@ -57,14 +80,13 @@ Deno.serve(async (req) => {
 
     const waMessageId = zapiData?.zaapId || zapiData?.messageId || null
 
-    // Persiste em conversas
     const { error: dbError } = await sb.from('conversas').insert({
       id: 'wa_out_' + Date.now() + '_' + Math.random().toString(36).slice(2),
       user_id,
       lead_id,
       canal: 'whatsapp',
       direcao: 'enviado',
-      mensagem,
+      mensagem: savedMensagem,
       wa_message_id: waMessageId,
       status: 'sent',
       data: new Date().toISOString(),
