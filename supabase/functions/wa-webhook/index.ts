@@ -4,49 +4,55 @@ const WEBHOOK_SECRET = Deno.env.get('WEBHOOK_SECRET')!
 const SB_URL         = Deno.env.get('SUPABASE_URL')!
 const SB_SERVICE     = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
+async function log(sb: ReturnType<typeof createClient>, level: string, message: string, data?: unknown) {
+  try { await sb.from('logs').insert({ level, source: 'wa-webhook', message, data: data ?? null }) } catch {}
+}
+
 Deno.serve(async (req) => {
-  // Valida segredo
-  const secret = req.headers.get('x-webhook-secret')
-  if (secret !== WEBHOOK_SECRET) {
-    console.warn('[wa-webhook] secret inválido')
-    return new Response('Unauthorized', { status: 401 })
-  }
+  const sb = createClient(SB_URL, SB_SERVICE)
+
+  await log(sb, 'info', 'Webhook recebido', { method: req.method })
 
   try {
     const payload = await req.json()
+    await log(sb, 'info', 'Payload recebido', payload)
 
-    // Ignora mensagens enviadas pelo próprio número
     if (payload.fromMe) {
+      await log(sb, 'info', 'Ignorado — fromMe=true', {})
       return new Response('ok', { status: 200 })
     }
 
-    // Normaliza telefone: remove 55 do início, mantém só dígitos
     const rawPhone = String(payload.phone || '').replace(/\D/g, '')
     const telefone = rawPhone.startsWith('55') ? rawPhone.slice(2) : rawPhone
     const mensagem = payload.text?.message || payload.body || ''
     const waMessageId = payload.messageId || payload.id || null
 
     if (!telefone || !mensagem) {
+      await log(sb, 'warn', 'Telefone ou mensagem vazia', { rawPhone, mensagem })
       return new Response('ok', { status: 200 })
     }
 
-    const sb = createClient(SB_URL, SB_SERVICE)
-
-    // Busca lead pelo telefone (tenta com e sem 55)
-    const { data: encontrados } = await sb
+    // Busca pelos últimos 8 dígitos para tolerar variações (com/sem 9, com/sem 55)
+    const ultimos8 = telefone.slice(-8)
+    const { data: encontrados, error: errBusca } = await sb
       .from('leads')
-      .select('id, user_id')
-      .or(`telefone.eq.${telefone},telefone.eq.55${telefone}`)
+      .select('id, user_id, telefone')
+      .ilike('telefone', `%${ultimos8}`)
       .limit(1)
 
+    await log(sb, 'info', 'Busca lead por telefone', {
+      buscando: telefone,
+      ultimos8,
+      encontrados: encontrados?.map(l => l.telefone),
+      erro: errBusca?.message || null,
+    })
+
     if (!encontrados?.length) {
-      console.log(`[wa-webhook] telefone não encontrado: ${telefone}`)
+      await log(sb, 'warn', 'Telefone não encontrado em leads', { telefone, ultimos8 })
       return new Response('ok', { status: 200 })
     }
 
     const lead = encontrados[0]
-
-    // Insere (UNIQUE constraint em wa_message_id previne duplicatas)
     const { error } = await sb.from('conversas').insert({
       id: 'wa_in_' + Date.now() + '_' + Math.random().toString(36).slice(2),
       user_id: lead.user_id,
@@ -60,12 +66,14 @@ Deno.serve(async (req) => {
     })
 
     if (error && !error.message?.includes('unique')) {
-      console.error('[wa-webhook] erro ao inserir:', error)
+      await log(sb, 'error', 'Erro ao inserir conversa', { error })
+    } else {
+      await log(sb, 'info', 'Mensagem recebida salva', { lead_id: lead.id, telefone })
     }
 
     return new Response('ok', { status: 200 })
-  } catch (e) {
-    console.error('[wa-webhook] erro:', e)
-    return new Response('ok', { status: 200 }) // sempre 200 para Z-API não fazer retry
+  } catch (e: any) {
+    await log(sb, 'error', 'Exceção no webhook', { message: e?.message })
+    return new Response('ok', { status: 200 })
   }
 })
