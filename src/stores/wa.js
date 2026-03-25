@@ -67,8 +67,13 @@ export const useWaStore = defineStore('wa', () => {
     const { data, error } = await sb.functions.invoke('wa-send', {
       body: { lead_id: leadId, user_id: userId, telefone, mensagem }
     })
-    if (error) throw error
-    if (!data?.ok) throw new Error(data?.error || 'Falha ao enviar')
+    if (error) {
+      // Tenta extrair corpo da resposta de erro
+      let detail = error.message
+      try { const ctx = await error.context?.json?.(); detail = ctx?.error || ctx?.detail || error.message } catch {}
+      throw new Error(detail)
+    }
+    if (!data?.ok) throw new Error(data?.error || data?.detail || 'Falha ao enviar')
     return data
   }
 
