@@ -45,6 +45,15 @@ export async function useAppInit() {
       event: '*', schema: 'public', table: 'configuracoes',
       filter: 'user_id=eq.' + auth.user.id
     }, () => { fin.loadMeta(); mapa.load() })
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'conversas',
+      filter: 'user_id=eq.' + auth.user.id
+    }, (payload) => {
+      const nova = payload.new
+      if (nova.lead_id === leads.drawerLeadId) {
+        leads.conversas.push(nova)
+      }
+    })
     .subscribe()
 
   // BroadcastChannel: recebe leads da aba de Prospecção

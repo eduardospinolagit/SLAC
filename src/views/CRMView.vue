@@ -393,7 +393,19 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
+    <!-- Abas do drawer -->
+    <div class="drawer-tabs">
+      <button class="drawer-tab" :class="{ active: drawerTab === 'dados' }" @click="drawerTab = 'dados'">Dados</button>
+      <button class="drawer-tab" :class="{ active: drawerTab === 'whatsapp' }" @click="drawerTab = 'whatsapp'">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp
+      </button>
+      <button class="drawer-tab" :class="{ active: drawerTab === 'historico' }" @click="drawerTab = 'historico'">Histórico</button>
+    </div>
+
     <div class="drawer-body">
+      <!-- ── ABA DADOS ── -->
+      <div v-show="drawerTab === 'dados'">
       <div class="drawer-section">
         <p class="drawer-section-title">Informações</p>
         <div class="form-group"><label class="form-label">Nome *</label><input v-model="form.nome" class="form-input" placeholder="Nome do responsável" /></div>
@@ -476,6 +488,41 @@
           <span class="hist-time">{{ fmtDataHora(h.ts) }}</span>
         </div>
       </div>
+      </div><!-- /aba dados -->
+
+      <!-- ── ABA WHATSAPP ── -->
+      <div v-show="drawerTab === 'whatsapp'" class="wa-tab">
+        <div class="wa-msgs">
+          <div v-if="!waMensagens.length" class="wa-empty">Nenhuma mensagem ainda. Envie a primeira!</div>
+          <div v-for="m in waMensagens" :key="m.id" class="wa-msg" :class="m.direcao === 'enviado' ? 'wa-out' : 'wa-in'">
+            <div class="wa-bubble">{{ m.mensagem }}</div>
+            <div class="wa-time">{{ fmtDataHora(m.data) }}</div>
+          </div>
+        </div>
+        <div class="wa-composer">
+          <div class="wa-toolbar">
+            <select v-model="waTemplateId" class="form-select wa-select" @change="waAplicarTemplate" :disabled="waGerandoScript">
+              <option value="">📋 Template...</option>
+              <option v-for="t in waTemplatesFiltrados" :key="t.id" :value="t.id">{{ t.nome }}</option>
+            </select>
+            <button class="btn btn-ghost btn-sm wa-ia-btn" @click="waGerarComIA" :disabled="waGerandoScript || waEnviando">
+              <span v-if="waGerandoScript">Gerando...</span>
+              <span v-else>✨ Gerar com IA</span>
+            </button>
+          </div>
+          <textarea v-model="waMensagem" class="form-textarea wa-textarea"
+            :placeholder="waGerandoScript ? 'Analisando perfil do negócio...' : 'Digite a mensagem...'"
+            :disabled="waGerandoScript" rows="4" />
+          <button class="btn btn-primary wa-send-btn" @click="waEnviar"
+            :disabled="!waMensagem.trim() || waEnviando || waGerandoScript">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            {{ waEnviando ? 'Enviando...' : 'Enviar no WhatsApp' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- ── ABA HISTÓRICO ── -->
+      <div v-show="drawerTab === 'historico'">
       <div v-if="currentLeadId" class="drawer-section">
         <p class="drawer-section-title">Conversas</p>
         <div class="conv-list">
@@ -509,6 +556,8 @@
           <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center" @click="addConversa">+ Registrar</button>
         </div>
       </div>
+      </div><!-- /aba historico -->
+
     </div>
     <div class="drawer-footer">
       <a :href="'https://wa.me/55'+form.telefone.replace(/\D/g,'')+'?text=Oi '+form.nome+'!'" target="_blank" class="btn btn-secondary">
@@ -532,8 +581,11 @@ import { useLeadsStore, ETAPAS } from '@/stores/leads'
 import { useWorkStore } from '@/stores/work'
 import { useAuthStore } from '@/stores/auth'
 import { useFinStore } from '@/stores/fin'
+import { useWaStore } from '@/stores/wa'
 import { useSaving } from '@/composables/useSaving'
 import { usePushNotifications } from '@/composables/usePushNotifications'
+
+const wa = useWaStore()
 
 const leads = useLeadsStore()
 const work  = useWorkStore()
@@ -541,6 +593,67 @@ const auth  = useAuthStore()
 const fin   = useFinStore()
 const { run, toast } = useSaving()
 const fmt = fin.fmt
+
+// ── WhatsApp ──
+const drawerTab        = ref('dados')
+const waMensagem       = ref('')
+const waTemplateId     = ref('')
+const waGerandoScript  = ref(false)
+const waEnviando       = ref(false)
+
+const waMensagens = computed(() =>
+  leads.conversas
+    .filter(c => c.canal === 'whatsapp')
+    .slice().sort((a, b) => new Date(a.data) - new Date(b.data))
+)
+
+const waTemplatesFiltrados = computed(() => {
+  const etapaAtual = form.value?.etapa
+  return wa.templates.filter(t => !t.etapa || t.etapa === etapaAtual)
+})
+
+function waAplicarTemplate() {
+  if (!waTemplateId.value) return
+  const t = wa.templates.find(x => x.id === waTemplateId.value)
+  if (!t) return
+  waMensagem.value = t.corpo
+    .replace(/\{\{nome\}\}/g, form.value.nome || '')
+    .replace(/\{\{negocio\}\}/g, form.value.negocio || '')
+    .replace(/\{\{cidade\}\}/g, form.value.cidade || '')
+}
+
+async function waGerarComIA() {
+  waGerandoScript.value = true
+  try {
+    const script = await wa.gerarScript(
+      auth.user.id,
+      form.value.instagram,
+      form.value.negocio || form.value.nome,
+      form.value.cidade
+    )
+    waMensagem.value = script
+  } catch {
+    toast('Erro ao gerar script. Verifique as configurações.', 'err')
+  } finally {
+    waGerandoScript.value = false
+  }
+}
+
+async function waEnviar() {
+  if (!form.value.telefone) { toast('Lead sem telefone cadastrado', 'err'); return }
+  if (!waMensagem.value.trim()) return
+  waEnviando.value = true
+  try {
+    await wa.enviarMensagem(currentLeadId.value, auth.user.id, form.value.telefone, waMensagem.value.trim())
+    waMensagem.value = ''
+    waTemplateId.value = ''
+    toast('Mensagem enviada!', 'ok')
+  } catch {
+    toast('Erro ao enviar. Verifique a integração Z-API.', 'err')
+  } finally {
+    waEnviando.value = false
+  }
+}
 
 const tab         = ref('kanban')
 function changeTab(t) {
@@ -619,13 +732,13 @@ const form = ref({
 function onFuDateChange() {
   if (!fuDate.value) { form.value.proximo_followup = ''; return }
   const time = fuTime.value || '09:00'
-  form.value.proximo_followup = `${fuDate.value}T${time}:00`
+  form.value.proximo_followup = new Date(`${fuDate.value}T${time}:00`).toISOString()
   fuTime.value = time
   agendarNotificacao()
 }
 function onFuTimeChange() {
   if (!fuDate.value) return
-  form.value.proximo_followup = `${fuDate.value}T${fuTime.value}:00`
+  form.value.proximo_followup = new Date(`${fuDate.value}T${fuTime.value}:00`).toISOString()
   agendarNotificacao()
 }
 function clearFollowUp() {
@@ -634,7 +747,8 @@ function clearFollowUp() {
 function syncFuFields() {
   if (form.value.proximo_followup) {
     const d = new Date(form.value.proximo_followup)
-    fuDate.value = d.toISOString().split('T')[0]
+    const pad = n => String(n).padStart(2, '0')
+    fuDate.value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`
     fuTime.value = d.toTimeString().slice(0, 5)
   } else {
     fuDate.value = ''; fuTime.value = ''
@@ -774,6 +888,8 @@ async function excluirSelecionados() {
 function openNew(etapa='contato') {
   currentLeadId.value=null; drawerTitle.value='Novo Lead'
   script.value=''; histEtapas.value=[]; leads.conversas=[]
+  leads.drawerLeadId=null; drawerTab.value='dados'
+  waMensagem.value=''; waTemplateId.value=''
   form.value={nome:'',negocio:'',telefone:'',categoria:'',cidade:'',instagram:'',site_atual:'',etapa,prioridade:'media',valor_estimado:'',proximo_followup:'',notas:''}
   fuDate.value=''; fuTime.value=''
   drawerOpen.value=true
@@ -783,13 +899,15 @@ function openNewEtapa(etapa) { openNew(etapa) }
 async function openLead(id) {
   const l = leads.getById(id); if (!l) return
   currentLeadId.value=id; drawerTitle.value=l.nome; script.value=''
+  leads.drawerLeadId=id; drawerTab.value='dados'
+  waMensagem.value=''; waTemplateId.value=''
   form.value={nome:l.nome||'',negocio:l.negocio||'',telefone:l.telefone||'',categoria:l.categoria||'',cidade:l.cidade||'',instagram:l.instagram||'',site_atual:l.site_atual||'',etapa:l.etapa||'contato',prioridade:l.prioridade||'media',valor_estimado:l.valor_estimado||'',proximo_followup:l.proximo_followup||'',notas:l.notas||''}
   syncFuFields()
   try { const raw=localStorage.getItem('slac_hist_'+id); histEtapas.value=raw?JSON.parse(raw):[] } catch { histEtapas.value=[] }
   drawerOpen.value=true
-  await leads.loadConversas(id)
+  await Promise.all([leads.loadConversas(id), wa.loadTemplates()])
 }
-function closeDrawer() { drawerOpen.value=false; currentLeadId.value=null; leads.conversas=[] }
+function closeDrawer() { drawerOpen.value=false; currentLeadId.value=null; leads.conversas=[]; leads.drawerLeadId=null }
 
 function salvarHistorico(id,de,para) {
   if(de===para) return
@@ -881,8 +999,7 @@ async function concluirRelead(lead) {
 
 async function agendarFollowUp(lead, horas) {
   const future = new Date(Date.now() + horas * 60 * 60 * 1000)
-  const pad = n => String(n).padStart(2, '0')
-  const iso = `${future.getFullYear()}-${pad(future.getMonth()+1)}-${pad(future.getDate())}T${pad(future.getHours())}:${pad(future.getMinutes())}:00`
+  const iso = future.toISOString()
   const idx = leads.leads.findIndex(l => l.id === lead.id)
   if (idx !== -1) leads.leads[idx] = { ...leads.leads[idx], proximo_followup: iso }
   run(() => leads.upsert({ ...lead, proximo_followup: iso, updated_at: new Date().toISOString() }), `Follow-up em ${horas}h agendado`)
@@ -890,7 +1007,7 @@ async function agendarFollowUp(lead, horas) {
 
 async function followUp24h(lead) {
   const ts = new Date(Date.now() + 24 * 60 * 60 * 1000)
-  const iso = ts.toISOString().slice(0, 16) + ':00'
+  const iso = ts.toISOString()
   const payload = { ...lead, proximo_followup: iso, updated_at: new Date().toISOString() }
 
   // Atualiza localmente na store ANTES de ir pra aba (não espera o Supabase)
@@ -924,18 +1041,20 @@ function openReleadModal(lead) {
   releadModal.value = lead
   // Default: 1 semana
   const d = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-  releadDate.value = d.toISOString().split('T')[0]
+  const pad = n => String(n).padStart(2, '0')
+  releadDate.value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`
   releadTime.value = '09:00'
 }
 
 function setReleadShortcut(days) {
   const d = new Date(Date.now() + days * 24 * 60 * 60 * 1000)
-  releadDate.value = d.toISOString().split('T')[0]
+  const pad = n => String(n).padStart(2, '0')
+  releadDate.value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`
 }
 
 async function confirmarRelead() {
   if (!releadDate.value || !releadModal.value) { toast('Escolha uma data', 'err'); return }
-  const iso = `${releadDate.value}T${releadTime.value}:00`
+  const iso = new Date(`${releadDate.value}T${releadTime.value}:00`).toISOString()
   const lead = releadModal.value
   const payload = { ...lead, relead_data: iso, updated_at: new Date().toISOString() }
   await run(() => leads.upsert(payload), `Relead agendado para ${fmtFuDate(iso)} ✓`)
@@ -1097,6 +1216,28 @@ async function pedirNotificacao() {
 [data-theme="light"] .drawer-bg{background:rgba(200,200,210,0.3);}
 .drawer{position:fixed;top:0;right:0;height:100vh;width:420px;max-width:95vw;background:rgba(18,18,18,0.38);backdrop-filter:blur(32px) saturate(180%);-webkit-backdrop-filter:blur(32px) saturate(180%);border-left:1px solid rgba(255,255,255,0.08);box-shadow:-8px 0 40px rgba(0,0,0,.5);z-index:801;display:flex;flex-direction:column;overflow:hidden;}
 [data-theme="light"] .drawer{background:rgba(255,255,255,0.42);border-left:1px solid rgba(255,255,255,0.75);box-shadow:-8px 0 40px rgba(0,0,0,.1);}
+/* Drawer tabs */
+.drawer-tabs{display:flex;gap:2px;background:var(--bg-elevated);border-bottom:1px solid var(--border-default);padding:0 1rem;flex-shrink:0;}
+.drawer-tab{display:flex;align-items:center;gap:5px;padding:.55rem .7rem;font-size:.78rem;font-weight:600;color:var(--text-tertiary);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:color .15s,border-color .15s;white-space:nowrap;}
+.drawer-tab:hover{color:var(--text-secondary);}
+.drawer-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+/* Aba WhatsApp */
+.wa-tab{display:flex;flex-direction:column;height:100%;}
+.wa-msgs{flex:1;overflow-y:auto;padding:.875rem 1.25rem;display:flex;flex-direction:column;gap:.5rem;min-height:160px;max-height:240px;}
+.wa-empty{color:var(--text-tertiary);font-size:.82rem;text-align:center;padding:2rem 0;}
+.wa-msg{display:flex;flex-direction:column;max-width:84%;}
+.wa-out{align-self:flex-end;align-items:flex-end;}
+.wa-in{align-self:flex-start;align-items:flex-start;}
+.wa-bubble{padding:.45rem .7rem;border-radius:12px;font-size:.83rem;line-height:1.5;}
+.wa-out .wa-bubble{background:rgba(34,197,94,.15);color:var(--accent);border-bottom-right-radius:3px;}
+.wa-in .wa-bubble{background:var(--bg-overlay);color:var(--text-primary);border-bottom-left-radius:3px;}
+.wa-time{font-size:.7rem;color:var(--text-tertiary);margin-top:2px;}
+.wa-composer{padding:.75rem 1.25rem;border-top:1px solid var(--border-default);display:flex;flex-direction:column;gap:.5rem;}
+.wa-toolbar{display:flex;gap:.5rem;}
+.wa-select{flex:1;font-size:.78rem;}
+.wa-ia-btn{font-size:.78rem;white-space:nowrap;}
+.wa-textarea{font-size:.83rem;resize:none;}
+.wa-send-btn{width:100%;justify-content:center;gap:.5rem;}
 .drawer-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border-default);flex-shrink:0;}
 .drawer-title{font-size:.9375rem;font-weight:700;color:var(--text-primary);}
 .drawer-body{flex:1;overflow-y:auto;padding:.875rem 1.25rem;display:flex;flex-direction:column;gap:.875rem;}

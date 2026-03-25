@@ -13,9 +13,10 @@ export const ETAPAS = [
 ]
 
 export const useLeadsStore = defineStore('leads', () => {
-  const leads = ref([])
-  const conversas = ref([])
-  const undoStack = ref([])
+  const leads        = ref([])
+  const conversas    = ref([])
+  const undoStack    = ref([])
+  const drawerLeadId = ref(null)
 
 
   async function load() {
@@ -123,5 +124,5 @@ export const useLeadsStore = defineStore('leads', () => {
     }).sort((a, b) => new Date(a.proximo_followup) - new Date(b.proximo_followup))
   })
 
-  return { leads, conversas, undoStack, load, loadConversas, upsert, remove, undo, addConversa, getById, stats, followUpsAlerta }
+  return { leads, conversas, undoStack, drawerLeadId, load, loadConversas, upsert, remove, undo, addConversa, getById, stats, followUpsAlerta }
 })
