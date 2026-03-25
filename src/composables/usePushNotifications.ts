@@ -24,6 +24,9 @@ export function usePushNotifications() {
   }
 
   async function subscribe(): Promise<boolean> {
+    console.log('[DEBUG] subscribe iniciado')
+    console.log('[DEBUG] isSupported:', isSupported())
+    console.log('[DEBUG] auth.user:', auth.user?.id)
     if (!isSupported()) return false
     if (!auth.user) return false
 

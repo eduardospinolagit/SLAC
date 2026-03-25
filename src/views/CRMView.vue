@@ -533,6 +533,7 @@ import { useWorkStore } from '@/stores/work'
 import { useAuthStore } from '@/stores/auth'
 import { useFinStore } from '@/stores/fin'
 import { useSaving } from '@/composables/useSaving'
+import { usePushNotifications } from '@/composables/usePushNotifications'
 
 const leads = useLeadsStore()
 const work  = useWorkStore()
@@ -953,11 +954,13 @@ const notifAtiva = ref(
   typeof Notification !== 'undefined' && Notification.permission === 'granted'
 )
 
+const { subscribe } = usePushNotifications()
+
 async function pedirNotificacao() {
-  if (!('Notification' in window)) { toast('Notificações não suportadas', 'error'); return }
-  if (Notification.permission === 'granted') { notifAtiva.value = true; return }
-  const perm = await Notification.requestPermission()
-  if (perm === 'granted') {
+  if (notifAtiva.value) return
+  console.log('[DEBUG] pedirNotificacao chamado')
+  const ok = await subscribe()
+  if (ok) {
     notifAtiva.value = true
     toast('Notificações ativadas', 'ok')
   } else {
