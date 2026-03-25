@@ -48,6 +48,17 @@ function showToast(message, type = 'ok') {
   const clean = message.replace(/\s*[✓✗]\s*/g, '').trim()
   toast.value = { show: true, message: clean, type }
   toastTimer = setTimeout(() => { toast.value.show = false }, 2600)
+  // Loga erros e warnings no banco
+  if (type === 'error' || type === 'err' || type === 'warn') {
+    const level = (type === 'warn') ? 'warn' : 'error'
+    sb.from('logs').insert({
+      user_id: auth.user?.id || null,
+      level,
+      source: 'frontend',
+      message: clean,
+      data: { url: window.location.pathname },
+    }).then(() => {})
+  }
 }
 provide('toast', showToast)
 
