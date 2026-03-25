@@ -108,6 +108,10 @@
                   Desfazer
                   <span v-if="leads.undoStack.length" class="ud-undo-badge">{{ leads.undoStack.length }}</span>
                 </button>
+                <button class="ud-item" @click="showUpdates = true; userMenuOpen = false">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  Atualizações
+                </button>
                 <button class="ud-item ud-danger" @click="handleLogout">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                   Sair
@@ -194,6 +198,94 @@
     </div>
   </div>
 
+  <!-- Modal de Atualizações -->
+  <Teleport to="body">
+    <Transition name="wb-modal">
+      <div v-if="showUpdates" class="wb-backdrop" @click.self="showUpdates = false" @keydown.esc="showUpdates = false">
+        <div class="upd-card">
+          <button class="wb-close" @click="showUpdates = false">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+
+          <div class="upd-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <div>
+              <h2 class="upd-title">Atualizações</h2>
+              <span class="upd-sub">SLAC — Sano Lab Advanced CRM</span>
+            </div>
+          </div>
+
+          <div class="upd-list">
+
+            <div class="upd-version">
+              <div class="upd-ver-header">
+                <span class="upd-badge upd-badge--new">v1.3</span>
+                <span class="upd-date">Março 2026</span>
+              </div>
+              <p class="upd-ver-title">SlacZap — Integração WhatsApp</p>
+              <ul class="upd-items">
+                <li>Chat ao vivo com leads via WhatsApp (Z-API)</li>
+                <li>Gravação e envio de áudio direto no browser</li>
+                <li>Envio de imagens, documentos e arquivos de áudio</li>
+                <li>Painel de contato com dados CRM + Work + status</li>
+                <li>Indicadores visuais de follow-up, relead e work ativo</li>
+                <li>Exportar conversa em .txt</li>
+                <li>Painel Contatos com acesso rápido ao chat</li>
+                <li>Notificações push diárias de follow-up</li>
+                <li>Painel de Logs (admin) com diagnóstico em tempo real</li>
+              </ul>
+            </div>
+
+            <div class="upd-version">
+              <div class="upd-ver-header">
+                <span class="upd-badge">v1.2</span>
+                <span class="upd-date">Fevereiro 2026</span>
+              </div>
+              <p class="upd-ver-title">Work, Mapa & Melhorias</p>
+              <ul class="upd-items">
+                <li>Módulo Work: gestão de serviços por cliente com tarefas</li>
+                <li>Mapa mental de objetivos por categoria (ok/em andamento/futuro)</li>
+                <li>Relead automático: reagenda leads perdidos</li>
+                <li>Desfazer ações no CRM (undo stack)</li>
+                <li>Boas-vindas de volta com resumo do período ausente</li>
+              </ul>
+            </div>
+
+            <div class="upd-version">
+              <div class="upd-ver-header">
+                <span class="upd-badge">v1.1</span>
+                <span class="upd-date">Janeiro 2026</span>
+              </div>
+              <p class="upd-ver-title">Financeiro & Recorrências</p>
+              <ul class="upd-items">
+                <li>Gestão de recorrências mensais com controle de pagamento</li>
+                <li>Fechamento de negócio com cálculo de parcelas</li>
+                <li>Gráficos de receita e despesas por período</li>
+                <li>Tema claro/escuro com persistência</li>
+                <li>PWA: instale o SLAC como app no celular</li>
+              </ul>
+            </div>
+
+            <div class="upd-version">
+              <div class="upd-ver-header">
+                <span class="upd-badge">v1.0</span>
+                <span class="upd-date">Dezembro 2025</span>
+              </div>
+              <p class="upd-ver-title">Lançamento inicial</p>
+              <ul class="upd-items">
+                <li>CRM com kanban de leads (6 etapas) e follow-up</li>
+                <li>Prospecção: importar CSV + modo foco fullscreen</li>
+                <li>Dashboard com KPIs e gráficos</li>
+                <li>Busca global por leads e páginas</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
+
   <ConfigModal v-model="configOpen" />
 </template>
 
@@ -216,6 +308,7 @@ const { theme, toggleTheme } = useTheme()
 const isDark = computed(() => theme.value === 'dark')
 const toast       = inject('toast')
 const configOpen  = ref(false)
+const showUpdates = ref(false)
 
 const collapsed = ref(localStorage.getItem('slac-sidebar') === 'collapsed')
 function toggle() {
@@ -726,4 +819,105 @@ function go(path) { router.push(path) }
 .wb-modal-leave-active { transition: opacity 180ms ease; }
 .wb-modal-enter-from   { opacity: 0; }
 .wb-modal-leave-to     { opacity: 0; }
+
+/* ── Modal Atualizações ── */
+.upd-card {
+  position: relative;
+  width: 440px;
+  max-width: calc(100vw - 2rem);
+  max-height: 82vh;
+  border-radius: 20px;
+  background: rgba(18,18,18,.42);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 28px 72px rgba(0,0,0,.55), 0 1px 0 rgba(255,255,255,.05) inset;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+[data-theme="light"] .upd-card {
+  background: rgba(255,255,255,.5);
+  border: 1px solid rgba(255,255,255,.8);
+  box-shadow: 0 20px 60px rgba(0,0,0,.12), 0 1px 0 rgba(255,255,255,.9) inset;
+}
+.upd-header {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: 1.4rem 1.5rem 1rem;
+  flex-shrink: 0;
+  color: var(--accent);
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+[data-theme="light"] .upd-header { border-bottom-color: rgba(0,0,0,.06); }
+.upd-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+.upd-sub {
+  font-size: .72rem;
+  color: var(--text-tertiary);
+}
+.upd-list {
+  overflow-y: auto;
+  padding: .75rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.upd-list::-webkit-scrollbar { width: 3px; }
+.upd-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 2px; }
+.upd-version { }
+.upd-ver-header {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  margin-bottom: .35rem;
+}
+.upd-badge {
+  font-size: .7rem;
+  font-weight: 700;
+  padding: .18rem .55rem;
+  border-radius: 20px;
+  background: rgba(255,255,255,.08);
+  color: var(--text-secondary);
+  letter-spacing: .04em;
+}
+.upd-badge--new {
+  background: rgba(34,197,94,.18);
+  color: var(--accent);
+}
+.upd-date {
+  font-size: .72rem;
+  color: var(--text-tertiary);
+}
+.upd-ver-title {
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 .45rem;
+}
+.upd-items {
+  margin: 0;
+  padding: 0 0 0 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .28rem;
+  list-style: none;
+}
+.upd-items li {
+  font-size: .8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  position: relative;
+}
+.upd-items li::before {
+  content: '·';
+  position: absolute;
+  left: -1rem;
+  color: var(--text-tertiary);
+}
 </style>
