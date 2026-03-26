@@ -1,10 +1,29 @@
 <template>
   <div class="sz-root" :class="{ 'sz-mobile-chat': activeLead && isMobile }">
 
+    <!-- ═══ CONEXÃO ═══ -->
+    <div v-if="!wa.connected" class="sz-connect-overlay">
+      <div v-if="wa.hasQr && wa.qrImage" class="sz-qr-wrap">
+        <p class="sz-qr-title">Conectar WhatsApp</p>
+        <p class="sz-qr-sub">Abra o WhatsApp no celular → <strong>Dispositivos conectados</strong> → Escanear QR Code</p>
+        <img :src="wa.qrImage" class="sz-qr-img" alt="QR Code WhatsApp" />
+      </div>
+      <div v-else class="sz-connecting">
+        <div class="sz-spinner"></div>
+        <p class="sz-connecting-title">Aguardando servidor...</p>
+        <p class="sz-connecting-hint">Certifique-se de que o app <strong>SLAC WhatsApp</strong> está rodando na bandeja do sistema</p>
+      </div>
+    </div>
+
     <!-- ═══ SIDEBAR ═══ -->
     <div class="sz-sidebar" :class="{ 'sz-sidebar--hidden': activeLead && isMobile }">
       <div class="sz-sidebar-header">
-        <h1 class="sz-sidebar-title">SlacZap</h1>
+        <div class="sz-sidebar-title-row">
+          <h1 class="sz-sidebar-title">SlacZap</h1>
+          <button class="sz-disconnect-btn" @click="wa.disconnect()" title="Desconectar WhatsApp" aria-label="Desconectar">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64A9 9 0 1 1 5.64 5.64"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+          </button>
+        </div>
         <div class="sz-search-wrap">
           <svg class="sz-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input v-model="search" class="sz-search" placeholder="Buscar" />
@@ -24,7 +43,7 @@
         <p v-else-if="!filteredChats.length" class="sz-empty-list">
           {{ search ? 'Nenhum resultado' : 'Nenhuma conversa ainda' }}
         </p>
-        <button v-for="c in filteredChats" :key="c.lead.id"
+        <button v-for="c in filteredChats" :key="c.lead.id || c.lead.telefone"
           class="sz-item" :class="{ 'sz-item--active': activeLead?.id === c.lead.id }"
           @click="openChat(c.lead)">
           <div v-if="itemStatuses(c.lead).length" class="sz-item-status-bar"
@@ -71,14 +90,8 @@
           <span class="sz-etapa-badge" :style="{ background: etapaColor(activeLead.etapa) + '20', color: etapaColor(activeLead.etapa) }">
             {{ etapaLabel(activeLead.etapa) }}
           </span>
-          <button class="sz-toolbar-btn" @click="exportarConversa" title="Exportar conversa" aria-label="Exportar conversa">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          </button>
-          <button class="sz-toolbar-btn" @click="openContact" title="Informações do contato" aria-label="Informações do contato">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </button>
-          <button class="sz-toolbar-btn" @click="irCRM" title="Abrir no CRM" aria-label="Abrir no CRM">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          <button v-if="activeLead?.id" class="sz-toolbar-btn" @click="configModalOpen = true" title="Configurações do lead" aria-label="Configurações do lead">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           </button>
         </div>
       </div>
@@ -224,109 +237,251 @@
         </div>
       </div>
 
-      <!-- Contact panel overlay -->
-      <Transition name="sz-panel-bg">
-        <div v-if="showContact" class="sz-panel-bg" @click="showContact = false"></div>
-      </Transition>
-
-      <!-- Contact panel -->
-      <Transition name="sz-panel">
-        <div v-if="showContact" class="sz-contact-panel">
-          <div class="sz-cp-header">
-            <h2 class="sz-cp-title">Contato</h2>
-            <button class="sz-cp-close" @click="showContact = false" aria-label="Fechar">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-          </div>
-          <div class="sz-cp-body">
-            <!-- Identity -->
-            <div class="sz-cp-identity">
-              <div class="sz-cp-avatar" :style="{ background: avatarColor(activeLead.nome) }">{{ initials(activeLead.nome) }}</div>
-              <div>
-                <p class="sz-cp-name">{{ activeLead.nome }}</p>
-                <span class="badge" :style="{ background: etapaColor(activeLead.etapa) + '22', color: etapaColor(activeLead.etapa) }">
-                  {{ etapaLabel(activeLead.etapa) }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Contato -->
-            <div class="sz-cp-section">
-              <p class="sz-cp-section-title">Contato</p>
-              <div class="sz-cp-field" v-if="activeLead.telefone">
-                <span class="sz-cp-label">Telefone</span>
-                <span class="sz-cp-value">{{ activeLead.telefone }}</span>
-              </div>
-              <div class="sz-cp-field" v-if="activeLead.email">
-                <span class="sz-cp-label">Email</span>
-                <span class="sz-cp-value">{{ activeLead.email }}</span>
-              </div>
-              <div class="sz-cp-field" v-if="activeLead.empresa">
-                <span class="sz-cp-label">Empresa</span>
-                <span class="sz-cp-value">{{ activeLead.empresa }}</span>
-              </div>
-              <div class="sz-cp-field" v-if="activeLead.origem">
-                <span class="sz-cp-label">Origem</span>
-                <span class="sz-cp-value">{{ activeLead.origem }}</span>
-              </div>
-            </div>
-
-            <!-- CRM -->
-            <div class="sz-cp-section">
-              <p class="sz-cp-section-title">CRM</p>
-              <div class="sz-cp-field" v-if="activeLead.proximo_followup">
-                <span class="sz-cp-label">Próximo follow-up</span>
-                <span class="sz-cp-value" :style="{ color: new Date(activeLead.proximo_followup) <= new Date() ? '#e8a838' : 'var(--text-primary)' }">
-                  {{ new Date(activeLead.proximo_followup).toLocaleDateString('pt-BR') }}
-                </span>
-              </div>
-              <div class="sz-cp-field" v-if="activeLead.relead_data">
-                <span class="sz-cp-label">Relead agendado</span>
-                <span class="sz-cp-value" style="color:#8b5cf6">
-                  {{ new Date(activeLead.relead_data).toLocaleDateString('pt-BR') }}
-                </span>
-              </div>
-              <div class="sz-cp-field" v-if="activeLead.valor">
-                <span class="sz-cp-label">Valor</span>
-                <span class="sz-cp-value">{{ fmtValor(activeLead.valor) }}</span>
-              </div>
-              <div class="sz-cp-field" v-if="activeLead.obs">
-                <span class="sz-cp-label">Observações</span>
-                <span class="sz-cp-value sz-cp-obs">{{ activeLead.obs }}</span>
-              </div>
-            </div>
-
-            <!-- Work -->
-            <div class="sz-cp-section" v-if="leadWorkItems.length">
-              <p class="sz-cp-section-title">Work</p>
-              <div v-for="item in leadWorkItems" :key="item.id" class="sz-cp-work-item">
-                <div class="sz-cp-work-header">
-                  <span class="sz-cp-work-service">{{ item.servico }}</span>
-                  <span class="sz-cp-work-badge" :class="'sz-cp-work-badge--' + item.status">
-                    {{ item.status === 'ativo' ? 'Em andamento' : 'Concluído' }}
-                  </span>
-                </div>
-                <div v-if="item.tarefas?.length" class="sz-cp-work-progress">
-                  <div class="sz-cp-progress-bar">
-                    <div class="sz-cp-progress-fill" :style="{ width: (item.tarefas.filter(t => t.feito).length / item.tarefas.length * 100) + '%' }"></div>
-                  </div>
-                  <span class="sz-cp-progress-text">{{ item.tarefas.filter(t => t.feito).length }}/{{ item.tarefas.length }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="sz-cp-actions">
-              <button class="btn btn-primary btn-sm" style="width:100%" @click="irCRM(); showContact = false">
-                Abrir no CRM
-              </button>
-            </div>
-          </div>
-        </div>
-      </Transition>
     </div>
 
+    <!-- ═══ CONFIG MODAL ═══ -->
+    <Transition name="sz-fade">
+      <div v-if="configModalOpen" class="sz-modal-overlay" @click.self="configModalOpen = false"
+        role="dialog" aria-label="Configurações do lead">
+        <div class="sz-modal">
+          <button class="sz-modal-close" @click="configModalOpen = false" aria-label="Fechar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+
+          <nav class="sz-modal-nav">
+            <button class="sz-modal-nav-item" :class="{ 'sz-modal-nav-item--active': activeSection === 'contato' }" @click="activeSection = 'contato'" title="Contato">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </button>
+            <button class="sz-modal-nav-item" :class="{ 'sz-modal-nav-item--active': activeSection === 'anotacoes' }" @click="activeSection = 'anotacoes'" title="Anotações">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3z"/><polyline points="15 3 15 9 21 9"/></svg>
+            </button>
+            <button class="sz-modal-nav-item" :class="{ 'sz-modal-nav-item--active': activeSection === 'followup' }" @click="activeSection = 'followup'" title="Follow-up">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="16" cy="16" r="3"/><path d="M16 14.5V16l1 1"/></svg>
+            </button>
+            <button class="sz-modal-nav-item" :class="{ 'sz-modal-nav-item--active': activeSection === 'financeiro' }" @click="activeSection = 'financeiro'" title="Financeiro">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </button>
+            <button class="sz-modal-nav-item" :class="{ 'sz-modal-nav-item--active': activeSection === 'analise' }" @click="activeSection = 'analise'" title="Análise IA">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/></svg>
+            </button>
+          </nav>
+
+          <div class="sz-modal-body">
+
+            <!-- Seção: Contato -->
+            <div v-if="activeSection === 'contato'">
+              <p class="sz-modal-section-title">Contato</p>
+              <div v-if="activeCrmLead" class="sz-modal-grid">
+                <div class="form-group">
+                  <label class="form-label">Nome</label>
+                  <input class="form-input" :value="activeCrmLead.nome" @blur="e => saveField('nome', e.target.value)" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Telefone</label>
+                  <input class="form-input" :value="activeCrmLead.telefone" @blur="e => saveField('telefone', e.target.value)" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Email</label>
+                  <input class="form-input" :value="activeCrmLead.email" @blur="e => saveField('email', e.target.value)" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Empresa</label>
+                  <input class="form-input" :value="activeCrmLead.empresa" @blur="e => saveField('empresa', e.target.value)" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Etapa</label>
+                  <select class="form-select" :value="activeCrmLead.etapa" @change="e => saveField('etapa', e.target.value)">
+                    <option v-for="et in ETAPAS" :key="et.id" :value="et.id">{{ et.label }}</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Valor Estimado (R$)</label>
+                  <input class="form-input" type="number" :value="activeCrmLead.valor_estimado"
+                    @blur="e => saveField('valor_estimado', e.target.value ? Number(e.target.value) : null)" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Origem</label>
+                  <input class="form-input" :value="activeCrmLead.origem" @blur="e => saveField('origem', e.target.value)" />
+                </div>
+                <div class="form-group sz-modal-full">
+                  <label class="form-label">Observações</label>
+                  <textarea class="form-textarea" rows="3" :value="activeCrmLead.obs" @blur="e => saveField('obs', e.target.value)"></textarea>
+                </div>
+              </div>
+              <div class="sz-modal-history">
+                <p class="sz-modal-section-title" style="margin-top:20px">Histórico</p>
+                <div class="sz-modal-history-row">
+                  <span class="sz-modal-history-label">Adicionado em</span>
+                  <span class="sz-modal-history-val">{{ activeCrmLead ? new Date(activeCrmLead.created_at).toLocaleDateString('pt-BR') : '—' }}</span>
+                </div>
+                <div class="sz-modal-history-row">
+                  <span class="sz-modal-history-label">Follow-ups realizados</span>
+                  <span class="sz-modal-history-val">{{ activeCrmLead?.followup_count ?? 0 }}</span>
+                </div>
+                <div class="sz-modal-history-row">
+                  <span class="sz-modal-history-label">Releads</span>
+                  <span class="sz-modal-history-val">{{ activeCrmLead?.relead_data ? '1' : 'Nenhum' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seção: Anotações -->
+            <div v-else-if="activeSection === 'anotacoes'">
+              <p class="sz-modal-section-title">Anotações</p>
+              <textarea class="form-textarea sz-anotacoes-textarea" v-model="anotacoesText"
+                placeholder="Anote qualquer informação sobre este lead..."
+                @input="onAnotacoesInput(anotacoesText)"></textarea>
+            </div>
+
+            <!-- Seção: Follow-up -->
+            <div v-else-if="activeSection === 'followup'">
+              <p class="sz-modal-section-title">Follow-up</p>
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <div class="form-group">
+                  <label class="form-label">Data e hora do próximo follow-up</label>
+                  <input type="datetime-local" class="form-input" v-model="followupDate" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Contexto</label>
+                  <input type="text" class="form-input" v-model="followupObs" placeholder="Ex.: ligar às 14h sobre proposta" />
+                </div>
+                <button class="btn btn-primary btn-sm" style="width:fit-content" @click="saveFollowup">
+                  Salvar follow-up
+                </button>
+              </div>
+            </div>
+
+            <!-- Seção: Financeiro -->
+            <div v-else-if="activeSection === 'financeiro'">
+              <p class="sz-modal-section-title">Financeiro</p>
+              <div class="sz-modal-grid" style="margin-bottom:20px">
+                <div class="form-group">
+                  <label class="form-label">Pacote</label>
+                  <select class="form-select" :value="activeCrmLead?.pacote ?? ''"
+                    @change="e => saveField('pacote', e.target.value || null)">
+                    <option value="">Não definido</option>
+                    <option value="essencial">Essencial — R$ 797</option>
+                    <option value="profissional">Profissional — R$ 1.097</option>
+                    <option value="completo">Completo — R$ 1.397</option>
+                    <option value="personalizado">Personalizado</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Valor do contrato (R$)</label>
+                  <input type="number" class="form-input" :value="activeCrmLead?.valor_contrato ?? ''"
+                    @blur="e => saveField('valor_contrato', e.target.value ? Number(e.target.value) : null)" />
+                </div>
+              </div>
+
+              <div style="margin-bottom:20px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                  <p class="sz-modal-section-title" style="margin:0">Parcelas</p>
+                  <button class="btn btn-ghost btn-sm" @click="adicionarParcela">+ Adicionar</button>
+                </div>
+                <div v-if="!parcelasLocal.length" style="font-size:13px;color:var(--text-tertiary)">
+                  Nenhuma parcela cadastrada.
+                </div>
+                <div v-for="(p, idx) in parcelasLocal.slice().sort((a,b) => a.numero - b.numero)" :key="p.numero" class="sz-parcela-row">
+                  <span class="sz-parcela-num">#{{ p.numero }}</span>
+                  <input type="number" class="form-input sz-parcela-input" placeholder="Valor"
+                    :value="p.valor"
+                    @blur="e => { parcelasLocal[idx].valor = e.target.value ? Number(e.target.value) : null; saveParcelas() }" />
+                  <input type="date" class="form-input sz-parcela-input"
+                    :value="p.vencimento"
+                    @blur="e => { parcelasLocal[idx].vencimento = e.target.value || null; saveParcelas() }" />
+                  <label class="sz-parcela-pago">
+                    <input type="checkbox" :checked="p.pago" @change="togglePago(idx)" />
+                    <span>Pago</span>
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <p class="sz-modal-section-title">Transações vinculadas</p>
+                <p v-if="!transacoesLead.length" style="font-size:13px;color:var(--text-tertiary)">
+                  Nenhuma transação vinculada a este contato.
+                </p>
+                <div v-for="t in transacoesLead" :key="t.id" class="tx-row">
+                  <span class="tx-date">{{ new Date(t.data).toLocaleDateString('pt-BR') }}</span>
+                  <span style="flex:1;font-size:13px;color:var(--text-primary)">{{ t.descricao }}</span>
+                  <span class="tx-val" :style="{ color: t.tipo === 'receita' ? 'var(--accent)' : 'var(--status-danger)' }">
+                    {{ t.tipo === 'receita' ? '+' : '-' }} R$ {{ Number(t.val).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seção: Análise IA -->
+            <div v-else-if="activeSection === 'analise'">
+              <p class="sz-modal-section-title">Análise IA</p>
+
+              <div v-if="analisando" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 0">
+                <div class="sz-typing"><span></span><span></span><span></span></div>
+                <p style="font-size:13px;color:var(--text-secondary)">Analisando conversa...</p>
+              </div>
+
+              <div v-else-if="erroAnalise" style="padding:16px 0">
+                <p style="font-size:13px;color:var(--status-danger);margin-bottom:12px">{{ erroAnalise }}</p>
+                <button class="btn btn-primary btn-sm" @click="analisarLead">Tentar novamente</button>
+              </div>
+
+              <div v-else-if="!activeCrmLead?.analise_ia" style="padding:16px 0">
+                <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.5">
+                  A IA analisa as últimas mensagens e avalia o potencial deste lead.
+                </p>
+                <button class="btn btn-primary" @click="analisarLead">Analisar conversa</button>
+              </div>
+
+              <div v-else>
+                <div style="margin-bottom:20px">
+                  <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                    <span style="font-size:12px;color:var(--text-secondary)">Score</span>
+                    <span style="font-size:12px;font-weight:600"
+                      :style="{ color: activeCrmLead.analise_ia.score > 70 ? 'var(--accent)' : activeCrmLead.analise_ia.score >= 40 ? 'var(--status-warning)' : 'var(--status-danger)' }">
+                      {{ activeCrmLead.analise_ia.score }}/100
+                    </span>
+                  </div>
+                  <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden">
+                    <div style="height:100%;border-radius:3px;transition:width 0.3s"
+                      :style="{
+                        width: activeCrmLead.analise_ia.score + '%',
+                        background: activeCrmLead.analise_ia.score > 70 ? 'var(--accent)' : activeCrmLead.analise_ia.score >= 40 ? 'var(--status-warning)' : 'var(--status-danger)'
+                      }"></div>
+                  </div>
+                </div>
+                <p style="font-size:13px;color:var(--text-primary);line-height:1.6;margin-bottom:16px">
+                  {{ activeCrmLead.analise_ia.resumo }}
+                </p>
+                <div v-if="activeCrmLead.analise_ia.positivos?.length" style="margin-bottom:14px">
+                  <p style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Pontos positivos</p>
+                  <div v-for="p in activeCrmLead.analise_ia.positivos" :key="p" class="sz-analise-item">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>{{ p }}</span>
+                  </div>
+                </div>
+                <div v-if="activeCrmLead.analise_ia.atencao?.length" style="margin-bottom:16px">
+                  <p style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Pontos de atenção</p>
+                  <div v-for="a in activeCrmLead.analise_ia.atencao" :key="a" class="sz-analise-item">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--status-warning)" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span>{{ a }}</span>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06)">
+                  <span style="font-size:11px;color:var(--text-tertiary)">
+                    Gerado em {{ new Date(activeCrmLead.analise_ia.geradoEm).toLocaleString('pt-BR') }}
+                  </span>
+                  <button class="btn btn-ghost btn-sm" @click="analisarLead">Re-analisar</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Empty state (desktop) -->
-    <div class="sz-empty-chat" v-else-if="!isMobile">
+    <div class="sz-empty-chat" v-if="!activeLead && !isMobile">
       <div class="sz-empty-icon">
         <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity=".18"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       </div>
@@ -338,12 +493,13 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick, onMounted, onUnmounted, inject } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted, inject } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useWaStore } from '@/stores/wa'
 import { useLeadsStore, ETAPAS } from '@/stores/leads'
 import { useAuthStore } from '@/stores/auth'
 import { useWorkStore } from '@/stores/work'
+import { useFinStore } from '@/stores/fin'
 import { sb } from '@/lib/supabase'
 
 const router  = useRouter()
@@ -352,13 +508,14 @@ const wa      = useWaStore()
 const leads   = useLeadsStore()
 const auth    = useAuthStore()
 const work    = useWorkStore()
+const fin     = useFinStore()
 const toast   = inject('toast')
 
 const search      = ref('')
 const activeLead  = ref(null)
 const waMsgs      = ref([])
 const loadingMsgs = ref(false)
-const loading     = ref(false)
+const loading     = ref(true)
 const novaMsg     = ref('')
 const enviando    = ref(false)
 const messagesEl  = ref(null)
@@ -366,8 +523,16 @@ const inputEl     = ref(null)
 const listEl      = ref(null)
 const isMobile    = ref(window.innerWidth < 768)
 
-// Contact panel
-const showContact = ref(false)
+// Config modal
+const configModalOpen = ref(false)
+const activeSection   = ref('contato')
+const analisando      = ref(false)
+const erroAnalise     = ref(null)
+const followupDate    = ref('')
+const followupObs     = ref('')
+const parcelasLocal   = ref([])
+const anotacoesText   = ref('')
+let anotacoesTimer    = null
 
 // Attachment
 const showAttachMenu  = ref(false)
@@ -449,6 +614,111 @@ const leadWorkItems = computed(() =>
   work.items.filter(i => i.lead_id === activeLead.value?.id)
 )
 
+// ── Config Modal ──
+const activeCrmLead = computed(() =>
+  activeLead.value?.id
+    ? leads.leads.find(l => l.id === activeLead.value.id) ?? null
+    : null
+)
+
+watch([configModalOpen, activeSection], () => {
+  if (!configModalOpen.value || !activeCrmLead.value) return
+  const l = activeCrmLead.value
+  if (activeSection.value === 'followup') {
+    followupDate.value = l.proximo_followup ? l.proximo_followup.slice(0, 16) : ''
+    followupObs.value  = l.followup_obs ?? ''
+  }
+  if (activeSection.value === 'financeiro') {
+    parcelasLocal.value = JSON.parse(JSON.stringify(l.parcelas ?? []))
+  }
+  if (activeSection.value === 'anotacoes') {
+    anotacoesText.value = l.anotacoes ?? ''
+  }
+})
+
+watch(activeLead, () => {
+  configModalOpen.value = false
+  activeSection.value   = 'contato'
+  erroAnalise.value     = null
+})
+
+function onEscModal(e) { if (e.key === 'Escape') configModalOpen.value = false }
+watch(configModalOpen, (val) => {
+  if (val) document.addEventListener('keydown', onEscModal)
+  else     document.removeEventListener('keydown', onEscModal)
+})
+
+function saveField(field, value) {
+  if (!activeCrmLead.value || activeCrmLead.value[field] === value) return
+  leads.upsert({ id: activeCrmLead.value.id, [field]: value ?? null })
+}
+
+function onAnotacoesInput(val) {
+  clearTimeout(anotacoesTimer)
+  anotacoesTimer = setTimeout(() => {
+    if (!activeCrmLead.value) return
+    leads.upsert({ id: activeCrmLead.value.id, anotacoes: val || null })
+  }, 800)
+}
+
+async function saveFollowup() {
+  if (!activeCrmLead.value) return
+  await leads.upsert({
+    id: activeCrmLead.value.id,
+    proximo_followup: followupDate.value || null,
+    followup_obs: followupObs.value || null,
+    followup_count: (activeCrmLead.value.followup_count ?? 0) + 1
+  })
+  toast('Follow-up salvo', 'ok')
+}
+
+const transacoesLead = computed(() => {
+  if (!activeCrmLead.value?.nome) return []
+  const nome = activeCrmLead.value.nome.toLowerCase()
+  return fin.fin
+    .filter(t => t.cli?.toLowerCase() === nome)
+    .slice(0, 10)
+})
+
+function adicionarParcela() {
+  parcelasLocal.value.push({
+    numero: parcelasLocal.value.length + 1,
+    valor: null,
+    vencimento: null,
+    pago: false
+  })
+}
+
+function saveParcelas() {
+  if (!activeCrmLead.value) return
+  leads.upsert({ id: activeCrmLead.value.id, parcelas: parcelasLocal.value })
+}
+
+function togglePago(idx) {
+  parcelasLocal.value[idx].pago = !parcelasLocal.value[idx].pago
+  saveParcelas()
+}
+
+async function analisarLead() {
+  if (!activeCrmLead.value) return
+  analisando.value  = true
+  erroAnalise.value = null
+  try {
+    const msgs = waMsgs.value
+      .slice(-50)
+      .map(m => ({ direcao: m.direcao, mensagem: (m.mensagem || '').slice(0, 500), data: m.data }))
+    const { data, error } = await sb.functions.invoke('analyze-lead', {
+      body: { leadId: activeCrmLead.value.id, messages: msgs }
+    })
+    if (error) throw error
+    await leads.upsert({ id: activeCrmLead.value.id, analise_ia: data })
+  } catch {
+    erroAnalise.value = 'Erro ao analisar. Tente novamente.'
+  } finally {
+    analisando.value = false
+  }
+}
+
 // ── Time formatting ──
 function fmtTime(ts) {
   if (!ts) return ''
@@ -508,50 +778,25 @@ function autoResize() {
 
 // ── Chat open/close ──
 async function openChat(chatLead) {
-  // resolve full lead data from store
-  activeLead.value = leads.leads.find(l => l.id === chatLead.id) || chatLead
-  showContact.value = false
+  activeLead.value = chatLead.id
+    ? (leads.leads.find(l => l.id === chatLead.id) || chatLead)
+    : chatLead
   loadingMsgs.value = true
-  const all = await leads.loadConversas(chatLead.id)
+  const all = chatLead.id
+    ? await leads.loadConversas(chatLead.id)
+    : await leads.loadConversasByPhone(chatLead.telefone)
   waMsgs.value = (all || []).filter(c => c.canal === 'whatsapp')
   loadingMsgs.value = false
   scrollBottom()
   nextTick(() => inputEl.value?.focus())
+  clearInterval(msgPoller)
+  msgPoller = setInterval(pollMsgs, 3000)
 }
 
 function closeChat() {
   activeLead.value = null
-  showContact.value = false
-}
-
-// ── Contact panel ──
-async function openContact() {
-  if (!work.items.length) await work.load()
-  showContact.value = true
-}
-
-// ── Export ──
-function exportarConversa() {
-  if (!waMsgs.value.length) { toast('Sem mensagens para exportar', 'warn'); return }
-  const lines = [
-    `Conversa com ${activeLead.value.nome} (${activeLead.value.telefone})`,
-    `Exportado em ${new Date().toLocaleString('pt-BR')}`,
-    '─────────────────────────────────', ''
-  ]
-  for (const m of waMsgs.value) {
-    const d = new Date(m.data)
-    const hora = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    const dia = d.toLocaleDateString('pt-BR')
-    lines.push(`[${dia} ${hora}] ${m.direcao === 'enviado' ? 'Você' : activeLead.value.nome}: ${m.mensagem}`)
-  }
-  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `conversa-${activeLead.value.nome.replace(/\s+/g, '_')}.txt`
-  document.body.appendChild(a); a.click()
-  document.body.removeChild(a); URL.revokeObjectURL(url)
-  toast('Conversa exportada', 'ok')
+  clearInterval(msgPoller)
+  msgPoller = null
 }
 
 // ── Recording ──
@@ -684,9 +929,37 @@ function irCRM() { router.push('/crm') }
 
 // ── Realtime ──
 let realtimeChannel = null
+let statusTimer = null
+let msgPoller = null
+
+async function pollMsgs() {
+  if (!activeLead.value) return
+  const all = activeLead.value.id
+    ? await leads.loadConversas(activeLead.value.id)
+    : await leads.loadConversasByPhone(activeLead.value.telefone)
+  const fresh = (all || []).filter(c => c.canal === 'whatsapp')
+  const existingIds = new Set(waMsgs.value.map(m => m.id))
+  const added = fresh.filter(m => !existingIds.has(m.id))
+  if (added.length) {
+    const confirmedTexts = new Set(added.map(m => m.mensagem))
+    waMsgs.value = [
+      ...waMsgs.value.filter(m => !m.id?.startsWith('opt_') || !confirmedTexts.has(m.mensagem)),
+      ...added,
+    ].sort((a, b) => new Date(a.data) - new Date(b.data))
+    scrollBottom()
+  }
+}
+
 onMounted(async () => {
   window.addEventListener('resize', onResize)
   document.addEventListener('click', onDocClick, true)
+
+  // Verifica status do servidor local e inicia polling
+  await wa.checkStatus()
+  statusTimer = setInterval(async () => {
+    await wa.checkStatus()
+    await wa.loadChats()
+  }, 5000)
 
   loading.value = true
   await Promise.all([wa.loadChats(), work.load()])
@@ -705,7 +978,13 @@ onMounted(async () => {
         const nova = payload.new
         if (nova.canal !== 'whatsapp') return
         await wa.loadChats()
-        if (activeLead.value?.id === nova.lead_id) {
+        const active = activeLead.value
+        const isActive = active && (
+          (active.id && active.id === nova.lead_id) ||
+          (!active.id && nova.telefone && active.telefone &&
+            nova.telefone.slice(-8) === active.telefone.replace(/\D/g,'').slice(-8))
+        )
+        if (isActive) {
           const exists = waMsgs.value.some(m => m.id === nova.id || (m.id?.startsWith('opt_') && m.mensagem === nova.mensagem))
           if (!exists) { waMsgs.value.push(nova); scrollBottom() }
         }
@@ -716,15 +995,109 @@ onUnmounted(() => {
   window.removeEventListener('resize', onResize)
   document.removeEventListener('click', onDocClick, true)
   if (realtimeChannel) sb.removeChannel(realtimeChannel)
+  clearInterval(statusTimer)
+  clearInterval(msgPoller)
   cancelRecording()
 })
 </script>
 
 <style scoped>
+/* ── Overlay de conexão ── */
+@keyframes sz-spin { to { transform: rotate(360deg) } }
+@keyframes sz-qr-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,.4) } 50% { box-shadow: 0 0 0 10px rgba(34,197,94,0) } }
+
+.sz-connect-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-base);
+  z-index: 10;
+  animation: sz-fadein .2s ease;
+}
+.sz-qr-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 2rem;
+}
+.sz-qr-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -.02em;
+}
+.sz-qr-sub {
+  font-size: .82rem;
+  color: var(--text-secondary);
+  max-width: 280px;
+  line-height: 1.5;
+}
+.sz-qr-img {
+  width: 220px;
+  height: 220px;
+  border-radius: 16px;
+  border: 3px solid var(--accent);
+  animation: sz-qr-pulse 2s ease infinite;
+}
+.sz-connecting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .75rem;
+  text-align: center;
+  padding: 2rem;
+}
+.sz-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--bg-overlay);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: sz-spin .8s linear infinite;
+}
+.sz-connecting-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.sz-connecting-hint {
+  font-size: .8rem;
+  color: var(--text-secondary);
+  max-width: 260px;
+  line-height: 1.5;
+}
+
+/* ── Sidebar title row ── */
+.sz-sidebar-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: .65rem;
+}
+.sz-disconnect-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.sz-disconnect-btn:hover { background: rgba(224,85,85,.12); color: #e05555; }
+
 /* ── Root ── */
 @keyframes sz-fadein { from { opacity: 0 } to { opacity: 1 } }
 
 .sz-root {
+  position: relative;
   display: flex;
   height: calc(100vh - 56px);
   overflow: hidden;
@@ -1044,87 +1417,104 @@ onUnmounted(() => {
 .sz-attach-enter-from { opacity: 0; transform: scale(.9) translateY(4px); }
 .sz-attach-leave-to { opacity: 0; transform: scale(.9) translateY(4px); }
 
-/* ── Contact panel ── */
-.sz-panel-bg {
-  position: absolute; inset: 0; background: rgba(0,0,0,.35); z-index: 30;
-}
-.sz-contact-panel {
-  position: absolute; top: 0; right: 0; bottom: 0; width: 320px;
-  background: var(--bg-surface); border-left: 1px solid var(--border-subtle);
-  z-index: 40; display: flex; flex-direction: column; overflow: hidden;
-}
-.sz-cp-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: .85rem 1rem; border-bottom: 1px solid var(--border-subtle); flex-shrink: 0;
-}
-.sz-cp-title { font-size: .95rem; font-weight: 700; color: var(--text-primary); margin: 0; }
-.sz-cp-close {
-  width: 28px; height: 28px; border-radius: 50%; border: none;
-  background: var(--bg-elevated); color: var(--text-secondary);
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: background .15s;
-}
-.sz-cp-close:hover { background: var(--bg-overlay); }
-.sz-cp-body {
-  flex: 1; overflow-y: auto; padding: 1rem;
-  display: flex; flex-direction: column; gap: .85rem;
-}
-.sz-cp-identity {
-  display: flex; align-items: center; gap: .75rem;
-  padding-bottom: .75rem; border-bottom: 1px solid var(--border-subtle);
-}
-.sz-cp-avatar {
-  width: 48px; height: 48px; border-radius: 50%;
+/* ── Config Modal Glass ── */
+.sz-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 200;
   display: flex; align-items: center; justify-content: center;
-  font-size: .85rem; font-weight: 700; color: #fff; flex-shrink: 0;
 }
-.sz-cp-name { font-size: .95rem; font-weight: 700; color: var(--text-primary); margin: 0 0 .3rem; }
-.sz-cp-section { }
-.sz-cp-section-title {
-  font-size: .68rem; font-weight: 700; color: var(--text-tertiary);
-  text-transform: uppercase; letter-spacing: .06em; margin: 0 0 .4rem;
+.sz-modal {
+  display: flex;
+  width: min(720px, 95vw);
+  height: min(560px, 90vh);
+  background: rgba(22,22,22,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
 }
-.sz-cp-field {
-  display: flex; flex-direction: column; gap: .1rem;
-  padding: .3rem 0; border-bottom: 1px solid var(--border-subtle);
+.sz-modal-close {
+  position: absolute; top: 12px; right: 12px;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-tertiary); padding: 4px; border-radius: 4px;
+  transition: color 0.15s;
 }
-.sz-cp-field:last-child { border-bottom: none; }
-.sz-cp-label { font-size: .7rem; color: var(--text-tertiary); }
-.sz-cp-value { font-size: .84rem; color: var(--text-primary); }
-.sz-cp-obs { white-space: pre-wrap; line-height: 1.5; font-size: .8rem; }
-.sz-cp-work-item {
-  background: var(--bg-elevated); border-radius: 10px;
-  padding: .6rem .75rem; margin-bottom: .35rem;
+.sz-modal-close:hover { color: var(--text-primary); }
+.sz-modal-nav {
+  width: 64px; flex-shrink: 0;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  display: flex; flex-direction: column;
+  padding: 48px 0 12px; gap: 2px;
 }
-.sz-cp-work-header {
+.sz-modal-nav-item {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 44px;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-tertiary);
+  border-left: 2px solid transparent;
+  transition: color 0.15s, background 0.15s;
+}
+.sz-modal-nav-item:hover { color: var(--text-secondary); background: rgba(255,255,255,0.03); }
+.sz-modal-nav-item--active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: var(--accent-subtle);
+}
+.sz-modal-body {
+  flex: 1; overflow-y: auto; padding: 24px;
+}
+.sz-modal-body::-webkit-scrollbar { width: 4px; }
+.sz-modal-body::-webkit-scrollbar-track { background: transparent; }
+.sz-modal-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+.sz-modal-section-title {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+  color: var(--text-secondary); text-transform: uppercase;
+  margin-bottom: 16px; margin-top: 0;
+}
+.sz-modal-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+.sz-modal-full { grid-column: 1 / -1; }
+.sz-modal-history-row {
   display: flex; justify-content: space-between; align-items: center;
-  gap: .5rem; margin-bottom: .3rem;
+  padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
 }
-.sz-cp-work-service { font-size: .84rem; font-weight: 600; color: var(--text-primary); }
-.sz-cp-work-badge {
-  font-size: .67rem; font-weight: 600; padding: .15rem .45rem; border-radius: 20px;
-  white-space: nowrap;
+.sz-modal-history-row:last-child { border-bottom: none; }
+.sz-modal-history-label { font-size: 12px; color: var(--text-secondary); }
+.sz-modal-history-val { font-size: 12px; color: var(--text-primary); font-weight: 500; }
+.sz-anotacoes-textarea { width: 100%; min-height: 200px; resize: vertical; box-sizing: border-box; }
+.sz-parcela-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.sz-parcela-num { font-size: 12px; color: var(--text-tertiary); min-width: 24px; }
+.sz-parcela-input { flex: 1; min-width: 0; }
+.sz-parcela-pago {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 12px; color: var(--text-secondary); white-space: nowrap; cursor: pointer;
 }
-.sz-cp-work-badge--ativo { background: rgba(91,141,238,.15); color: #5b8dee; }
-.sz-cp-work-badge--concluido { background: var(--accent-subtle); color: var(--accent); }
-.sz-cp-work-progress { display: flex; align-items: center; gap: .5rem; }
-.sz-cp-progress-bar {
-  flex: 1; height: 4px; background: var(--bg-overlay); border-radius: 4px; overflow: hidden;
+.sz-analise-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 13px; padding: 4px 0; color: var(--text-primary);
 }
-.sz-cp-progress-fill {
-  height: 100%; background: var(--accent); border-radius: 4px; transition: width .3s;
+.sz-analise-item svg { flex-shrink: 0; margin-top: 2px; }
+/* Fade transition */
+.sz-fade-enter-active, .sz-fade-leave-active { transition: opacity 0.15s ease; }
+.sz-fade-enter-from, .sz-fade-leave-to { opacity: 0; }
+/* Mobile */
+@media (max-width: 768px) {
+  .sz-modal { width: 100vw; height: 100vh; border-radius: 0; border: none; flex-direction: column; }
+  .sz-modal-nav {
+    width: 100%; height: 52px; flex-shrink: 0; flex-direction: row;
+    border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+  }
+  .sz-modal-nav::-webkit-scrollbar { display: none; }
+  .sz-modal-nav-item { flex-shrink: 0; width: 52px; height: 100%; border-left: none; border-bottom: 2px solid transparent; }
+  .sz-modal-nav-item--active { border-left-color: transparent; border-bottom-color: var(--accent); }
+  .sz-modal-body { padding: 16px; }
+  .sz-modal-grid { grid-template-columns: 1fr; }
 }
-.sz-cp-progress-text { font-size: .7rem; color: var(--text-tertiary); white-space: nowrap; }
-.sz-cp-actions { padding-top: .25rem; }
-
-/* Panel transitions */
-.sz-panel-enter-active { transition: transform .25s cubic-bezier(.4,0,.2,1); }
-.sz-panel-leave-active { transition: transform .2s ease; }
-.sz-panel-enter-from, .sz-panel-leave-to { transform: translateX(100%); }
-
-.sz-panel-bg-enter-active { transition: opacity .2s; }
-.sz-panel-bg-leave-active { transition: opacity .15s; }
-.sz-panel-bg-enter-from, .sz-panel-bg-leave-to { opacity: 0; }
 
 /* ── Empty state ── */
 .sz-empty-chat {
