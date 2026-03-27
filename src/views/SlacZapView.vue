@@ -446,7 +446,7 @@
                       {{ activeCrmLead.analise_ia.score }}/100
                     </span>
                   </div>
-                  <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden">
+                  <div style="height:6px;background:var(--bg-overlay);border-radius:3px;overflow:hidden">
                     <div style="height:100%;border-radius:3px;transition:width 0.3s"
                       :style="{
                         width: activeCrmLead.analise_ia.score + '%',
@@ -471,7 +471,7 @@
                     <span>{{ a }}</span>
                   </div>
                 </div>
-                <div style="display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06)">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border-subtle)">
                   <span style="font-size:11px;color:var(--text-tertiary)">
                     Gerado em {{ new Date(activeCrmLead.analise_ia.geradoEm).toLocaleString('pt-BR') }}
                   </span>
@@ -1060,6 +1060,22 @@ onUnmounted(() => {
   /* Inverte QR gerado com fundo escuro para fundo branco no tema claro */
   filter: invert(1) saturate(0) contrast(1.5);
   border-color: var(--accent);
+}
+/* Light mode — overlay de conexão visível sobre fundo claro */
+:global([data-theme="light"]) .sz-connect-overlay {
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-default);
+}
+:global([data-theme="light"]) .sz-spinner {
+  border-color: var(--border-default);
+  border-top-color: var(--accent);
+}
+:global([data-theme="light"]) .sz-sidebar {
+  border-right-color: var(--border-default);
+}
+:global([data-theme="light"]) .sz-search {
+  background: var(--bg-overlay);
+  border-color: var(--border-default);
 }
 .sz-connecting {
   display: flex;

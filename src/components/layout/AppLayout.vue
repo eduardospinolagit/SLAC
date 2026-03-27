@@ -579,13 +579,14 @@ function go(path) { router.push(path) }
 /* Main wrapper */
 .main-wrapper { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 
-/* Topbar — sem borda inferior */
+/* Topbar — sem borda inferior no dark; light mode recebe separador */
 .topbar {
   display: flex; align-items: center; gap: 1rem;
   padding: 0 1.25rem; height: 56px;
   background: var(--bg-base);
   flex-shrink: 0;
 }
+[data-theme="light"] .topbar { border-bottom: 1px solid var(--border-default); }
 
 .topbar-search {
   flex: 1; position: relative;
