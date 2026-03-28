@@ -2498,6 +2498,10 @@ function initials(nome) {
 }
 function etapaColor(etapa) { return ETAPAS.find(e => e.id === etapa)?.color || '#888' }
 function etapaLabel(etapa) { return ETAPAS.find(e => e.id === etapa)?.label || etapa }
+function fmtDataHora(d) {
+  if (!d) return '—'
+  return new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+}
 function fmtValor(v) {
   return v ? 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : ''
 }
