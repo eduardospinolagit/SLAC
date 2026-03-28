@@ -760,7 +760,7 @@
                   <div class="form-group">
                     <label class="form-label">Enviar se não responder em</label>
                     <div class="sz-fuauto-horas-row">
-                      <select class="form-select" v-model="fuAutoHorasLocal" @change="wa.setFuAutoHoras(slacOptsLead, fuAutoHorasLocal)" style="width:auto">
+                      <select class="form-select" v-model="fuAutoHorasLocal" style="width:auto">
                         <option :value="1">1 hora</option>
                         <option :value="2">2 horas</option>
                         <option :value="3">3 horas</option>
@@ -772,6 +772,7 @@
                       </select>
                       <span class="text-muted text-sm">após a última mensagem enviada</span>
                     </div>
+                    <button class="btn btn-primary btn-sm" style="margin-top:8px;width:fit-content" @click="saveFuAutoHoras">Salvar</button>
                   </div>
 
                   <div v-if="wa.isFuAutoActive(slacOptsLead)" class="sz-sdr-active-info">
@@ -2604,6 +2605,8 @@ watch([opcoesSLACOpen, activeSection], () => {
   if (activeSection.value === 'followup') {
     followupDate.value = l.proximo_followup ? toLocalDatetimeInput(l.proximo_followup) : ''
     followupObs.value  = l.followup_obs ?? ''
+    const fuKey = slacOptsLead.value && wa.fuAutoKey(slacOptsLead.value)
+    fuAutoHorasLocal.value = (fuKey && wa.fuAutoChats[fuKey]?.horas) || 4
   }
   if (activeSection.value === 'financeiro') {
     parcelasLocal.value = JSON.parse(JSON.stringify(l.parcelas ?? []))
@@ -2677,6 +2680,18 @@ async function handleToggleFuAutoChat() {
     const fuAt = new Date(Date.now() + fuAutoHorasLocal.value * 3600000).toISOString()
     await leads.upsert({ id: activeCrmLead.value.id, proximo_followup: fuAt })
   }
+}
+
+async function saveFuAutoHoras() {
+  const lead = slacOptsLead.value
+  if (!lead) return
+  await wa.setFuAutoHoras(lead, fuAutoHorasLocal.value)
+  // Atualiza proximo_followup se FuAuto já está ativo
+  if (wa.isFuAutoActive(lead) && activeCrmLead.value) {
+    const fuAt = new Date(Date.now() + fuAutoHorasLocal.value * 3600000).toISOString()
+    await leads.upsert({ id: activeCrmLead.value.id, proximo_followup: fuAt })
+  }
+  toast('Configuração salva', 'ok')
 }
 
 const transacoesLead = computed(() => {
