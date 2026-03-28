@@ -44,9 +44,19 @@
         <span class="kpi-sub">{{ listaFiltrada.filter(t=>t.tipo==='saida').length }} transações</span>
       </div>
       <div class="kpi-card kpi-card--lucro" :class="f.lucro < 0 ? 'kpi-card--lucro-neg' : ''">
-        <span class="kpi-label">Lucro</span>
-        <span class="kpi-value kpi-value--white">{{ fmt(f.lucro) }}</span>
-        <span class="kpi-sub">{{ f.lucro >= 0 ? 'positivo' : 'negativo' }}</span>
+        <span class="kpi-label">Receita Total</span>
+        <span class="kpi-value kpi-value--white">{{ fmt(f.rec + f.pend) }}</span>
+        <div class="kpi-rec-detail">
+          <span class="kpi-rec-item">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            {{ fmt(f.rec) }}
+          </span>
+          <span class="kpi-rec-sep">·</span>
+          <span class="kpi-rec-item kpi-rec-item--pend">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            {{ fmt(f.pend) }}
+          </span>
+        </div>
       </div>
       <div class="kpi-card">
         <span class="kpi-label">Ticket médio</span>
@@ -101,7 +111,7 @@
             <tr v-if="!listaOrdenada.length">
               <td colspan="7" style="text-align:center;color:var(--text-tertiary);padding:2rem;font-size:.875rem">Nenhuma transação</td>
             </tr>
-            <tr v-for="t in listaOrdenada" :key="t.id" class="tx-table-row">
+            <tr v-for="t in listaOrdenada" :key="t.id" class="tx-table-row" :class="{ 'tx-row--vencida': isVencida(t) }">
               <td class="text-muted text-sm" style="white-space:nowrap">{{ fmtData(t.data) }}</td>
               <td>
                 <div style="font-weight:500;color:var(--text-primary)">{{ t.desc }}</div>
@@ -113,8 +123,9 @@
               <td class="text-muted text-sm">{{ t.cli || '—' }}</td>
               <td>
                 <span class="badge"
-                  :class="t.tipo==='entrada' ? (t.st==='pendente' ? 'badge-warning' : 'badge-accent') : 'badge-danger'">
-                  {{ t.tipo==='entrada' ? (t.st==='pendente' ? 'Pendente' : 'Recebido') : 'Saída' }}
+                  :class="t.tipo==='entrada' ? (t.st==='pendente' ? (isVencida(t) ? 'badge-vencida' : 'badge-warning') : 'badge-accent') : 'badge-danger'">
+                  <svg v-if="isVencida(t)" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  {{ t.tipo==='entrada' ? (t.st==='pendente' ? (isVencida(t) ? 'Vencida' : 'Pendente') : 'Recebido') : 'Saída' }}
                 </span>
               </td>
               <td style="text-align:right;font-weight:700;font-family:var(--font-display)"
@@ -259,6 +270,13 @@ const listaOrdenada = computed(() => {
 function toggleSort(key) {
   if (sortKey.value === key) sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
   else { sortKey.value = key; sortDir.value = 'desc' }
+}
+
+function isVencida(t) {
+  if (t.tipo !== 'entrada' || t.st !== 'pendente' || !t.data) return false
+  const [y, m, day] = t.data.split('-')
+  const dt = new Date(Number(y), Number(m) - 1, Number(day))
+  return dt < new Date(new Date().toDateString())
 }
 
 function fmtData(d) {
@@ -470,8 +488,20 @@ watch(theme, renderCharts)
 
 .kpi-card--lucro { background: var(--accent); border-color: var(--accent); }
 .kpi-card--lucro-neg { background: var(--status-danger); border-color: var(--status-danger); }
-.kpi-card--lucro .kpi-label, .kpi-card--lucro .kpi-sub { color: rgba(255,255,255,.7); }
+.kpi-card--lucro .kpi-label { color: rgba(255,255,255,.7); }
 .kpi-value--white { color: #fff !important; }
-[data-theme="light"] .kpi-card--lucro .kpi-label, [data-theme="light"] .kpi-card--lucro .kpi-sub { color: rgba(0,0,0,.55); }
+[data-theme="light"] .kpi-card--lucro .kpi-label { color: rgba(0,0,0,.55); }
 [data-theme="light"] .kpi-value--white { color: #fff !important; }
+
+.kpi-rec-detail { display: flex; align-items: center; gap: .3rem; flex-wrap: wrap; margin-top: .15rem; }
+.kpi-rec-item { display: inline-flex; align-items: center; gap: .25rem; font-size: .72rem; font-weight: 600; color: rgba(255,255,255,.85); }
+.kpi-rec-item--pend { color: rgba(255,255,255,.6); }
+.kpi-rec-sep { font-size: .72rem; color: rgba(255,255,255,.4); }
+[data-theme="light"] .kpi-rec-item { color: rgba(0,0,0,.75); }
+[data-theme="light"] .kpi-rec-item--pend { color: rgba(0,0,0,.45); }
+[data-theme="light"] .kpi-rec-sep { color: rgba(0,0,0,.25); }
+
+.tx-row--vencida td { background: rgba(232,168,56,.05); }
+.tx-row--vencida td:first-child { border-left: 2.5px solid var(--status-warning); }
+.badge-vencida { background: rgba(232,168,56,.15); color: var(--status-warning); border: 1px solid rgba(232,168,56,.3); display: inline-flex; align-items: center; gap: .25rem; }
 </style>
