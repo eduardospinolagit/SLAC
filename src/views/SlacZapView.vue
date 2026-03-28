@@ -204,7 +204,7 @@
           <!-- RECENTES -->
           <template v-if="recentChats.length">
             <div class="sz-list-section" v-if="pinnedChats.length">Recentes</div>
-            <div v-for="c in recentChats" :key="c.lead.id || c.lead.telefone"
+            <div v-for="c in paginatedRecentChats" :key="c.lead.id || c.lead.telefone"
               class="sz-item" :class="{ 'sz-item--active': activeLead?.id === c.lead.id }"
               role="button" tabindex="0"
               @click="openChat(c.lead)" @keydown.enter.prevent="openChat(c.lead)">
@@ -249,6 +249,11 @@
               </div>
             </div>
           </template>
+
+          <!-- Sentinel infinite scroll -->
+          <div ref="sentinelEl" class="sz-load-sentinel">
+            <span v-if="hasMoreChats" class="sz-load-more-hint">Carregando mais...</span>
+          </div>
         </template>
       </div>
     </div>
@@ -1352,6 +1357,8 @@ const messagesEl    = ref(null)
 const firstUnreadTs = ref(null)  // timestamp da última leitura ao abrir o chat
 const inputEl     = ref(null)
 const listEl      = ref(null)
+const sentinelEl  = ref(null)
+const chatsVisible = ref(20)
 const isMobile    = ref(window.innerWidth < 768)
 const isDarkTheme = ref(document.documentElement.getAttribute('data-theme') !== 'light')
 
@@ -2873,6 +2880,11 @@ const pinnedChats = computed(() =>
 const recentChats = computed(() =>
   filteredChats.value.filter(c => !pinnedLeadIds.value.has(c.lead.id || c.lead.telefone))
 )
+const paginatedRecentChats = computed(() => recentChats.value.slice(0, chatsVisible.value))
+const hasMoreChats = computed(() => chatsVisible.value < recentChats.value.length)
+
+// Reset paginação ao mudar busca ou filtro
+watch([search, chatFilter], () => { chatsVisible.value = 20 })
 
 function scrollBottom() {
   nextTick(() => { if (messagesEl.value) messagesEl.value.scrollTop = messagesEl.value.scrollHeight })
@@ -3167,6 +3179,19 @@ async function pollMsgs() {
 
 const _themeObserver = new MutationObserver(() => {
   isDarkTheme.value = document.documentElement.getAttribute('data-theme') !== 'light'
+})
+
+// IntersectionObserver para infinite scroll da lista de chats
+let _chatObserver = null
+watch(sentinelEl, (el) => {
+  if (_chatObserver) _chatObserver.disconnect()
+  if (!el) return
+  _chatObserver = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && hasMoreChats.value) {
+      chatsVisible.value += 20
+    }
+  }, { root: listEl.value, threshold: 0.1 })
+  _chatObserver.observe(el)
 })
 
 onMounted(async () => {
@@ -4131,6 +4156,8 @@ onUnmounted(() => {
 .sz-list { flex: 1; overflow-y: auto; overflow-x: hidden; }
 .sz-list::-webkit-scrollbar { width: 3px; }
 .sz-list::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 2px; }
+.sz-load-sentinel { height: 32px; display: flex; align-items: center; justify-content: center; }
+.sz-load-more-hint { font-size: .65rem; color: var(--text-tertiary); }
 
 .sz-empty-list {
   padding: 3rem 1rem; text-align: center;
