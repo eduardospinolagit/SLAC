@@ -56,7 +56,7 @@ export async function useAppInit() {
     .on('postgres_changes', {
       event: '*', schema: 'public', table: 'configuracoes',
       filter: 'user_id=eq.' + auth.user.id
-    }, () => { fin.loadMeta(); mapa.load() })
+    }, () => { fin.loadMeta(); mapa.load(); wa.loadSdrConfig().catch(() => {}) })
     .on('postgres_changes', {
       event: 'INSERT', schema: 'public', table: 'conversas',
       filter: 'user_id=eq.' + auth.user.id

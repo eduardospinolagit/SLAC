@@ -945,7 +945,11 @@
                 </div>
                 <div v-if="!wa.sdrIsInHours()" class="sz-sdr-active-row sz-sdr-active-row--warn">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  Fora do horário — SDR pausado até {{ wa.sdrConfig.horaInicio }}
+                  {{ sdrForaMotivo }}
+                </div>
+                <div v-if="wa.isSdrActive(activeLead) && activeLead?.etapa && !wa.sdrConfig.etapas.includes(activeLead.etapa)" class="sz-sdr-active-row sz-sdr-active-row--warn">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  Etapa "{{ activeLead.etapa }}" não configurada no SDR
                 </div>
               </div>
 
@@ -1608,6 +1612,17 @@ const aiSugestao    = ref('')
 // SDR — lock por chat (evita respostas paralelas para o mesmo lead)
 const sdrLocks = reactive({})
 
+const sdrForaMotivo = computed(() => {
+  const day  = new Date().getDay()
+  const dias = wa.sdrConfig.diasSemana || []
+  if (!dias.includes(day)) {
+    const NOMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
+    const conf  = dias.map(d => NOMES[d]).join(', ')
+    return `Fora dos dias configurados (${conf || '—'}) — SDR pausado`
+  }
+  return `Fora do horário — SDR pausado até ${wa.sdrConfig.horaInicio}`
+})
+
 async function sdrAutoRespond(lead, cachedMsgs) {
   if (!lead) return
   if (!wa.sdrConfig.enabled) return
@@ -1812,7 +1827,7 @@ async function openAnalysisModal() {
     const { data } = await sb.from('configuracoes')
       .select('valor').eq('user_id', auth.user.id).eq('chave', key).maybeSingle()
     if (data?.valor) {
-      const parsed = JSON.parse(data.valor)
+      const parsed = typeof data.valor === 'string' ? JSON.parse(data.valor) : data.valor
       analysisResult.value = parsed
       analysisCache[key]   = parsed
     }
@@ -1866,7 +1881,7 @@ async function analisarLeadIA() {
     const key = analysisKey(lead)
     analysisCache[key] = result
     await sb.from('configuracoes').upsert(
-      { user_id: auth.user.id, chave: key, valor: JSON.stringify(result) },
+      { user_id: auth.user.id, chave: key, valor: result },
       { onConflict: 'user_id,chave' }
     )
   } catch (e) {
@@ -2813,7 +2828,7 @@ async function saveLastSeenRemote() {
     await sb.from('configuracoes').upsert({
       user_id: auth.user.id,
       chave: 'wa_last_seen',
-      valor: JSON.stringify(lastSeenAt.value)
+      valor: lastSeenAt.value
     }, { onConflict: 'user_id,chave' })
   } catch { /* silent */ } finally {
     _savingLastSeen = false
@@ -2828,7 +2843,7 @@ async function syncLastSeen() {
       .eq('chave', 'wa_last_seen')
       .maybeSingle()
     if (!data?.valor) return
-    const remote = JSON.parse(data.valor)
+    const remote = typeof data.valor === 'string' ? JSON.parse(data.valor) : data.valor
     // merge: usa o timestamp mais recente por chave
     let changed = false
     const merged = { ...lastSeenAt.value }
@@ -2866,9 +2881,6 @@ function getUnreadCount(chat) {
   return wa.unreadCounts[chatKey(chat.lead)] || 0
 }
 
-function incrementUnread(leadId, telefone) {
-  wa.storeIncrementUnread(leadId || telefone || '')
-}
 
 const filteredChats = computed(() => {
   const q = search.value.toLowerCase()
@@ -3286,7 +3298,7 @@ onMounted(async () => {
           const exists = waMsgs.value.some(m => m.id === nova.id || (m.id?.startsWith('opt_') && m.mensagem === nova.mensagem))
           if (!exists) { waMsgs.value.push(nova); scrollBottom() }
         } else if (nova.direcao === 'recebido') {
-          incrementUnread(nova.lead_id, nova.telefone)
+          // incrementUnread gerenciado pelo useAppInit globalmente (evita contagem dupla)
           setTimeout(fetchUnreadCounts, 500)
           playNotifSound()
         }
