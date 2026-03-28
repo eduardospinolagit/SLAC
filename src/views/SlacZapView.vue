@@ -291,7 +291,7 @@
             <svg v-else width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="sz-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
             <span style="font-size:11px;margin-left:4px">Salvar no CRM</span>
           </button>
-          <button v-if="activeLead?.id" class="sz-toolbar-btn" @click="opcoesSLACOpen = true" title="Configurações do lead" aria-label="Configurações do lead">
+          <button v-if="activeLead?.id" class="sz-toolbar-btn" @click="openSlacOptsFromToolbar" title="Configurações do lead" aria-label="Configurações do lead">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           </button>
         </div>
@@ -312,6 +312,12 @@
           <div class="sz-typing"><span></span><span></span><span></span></div>
         </div>
         <template v-else>
+          <div v-if="msgsHasMore" class="sz-load-more-wrap">
+            <button class="sz-load-more-btn" @click="loadMoreMsgs" :disabled="loadingMoreMsgs">
+              <div v-if="loadingMoreMsgs" class="sz-typing"><span></span><span></span><span></span></div>
+              <span v-else>Carregar anteriores</span>
+            </button>
+          </div>
           <p v-if="!waMsgs.length" class="sz-no-msgs">Nenhuma mensagem ainda.<br>Diga olá! 👋</p>
           <template v-for="(group, gi) in msgGroups" :key="gi">
             <div class="sz-time-sep">{{ group.label }}</div>
@@ -628,10 +634,10 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3z"/><polyline points="15 3 15 9 21 9"/></svg>
               <span>Anotações</span>
             </button>
-            <button class="sz-modal-nav-item" :class="{ 'sz-modal-nav-item--active': activeSection === 'followup', 'sz-modal-nav-item--sdr': wa.isFuAutoActive(activeLead) }" @click="activeSection = 'followup'">
+            <button class="sz-modal-nav-item" :class="{ 'sz-modal-nav-item--active': activeSection === 'followup', 'sz-modal-nav-item--sdr': wa.isFuAutoActive(slacOptsLead) }" @click="activeSection = 'followup'">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               <span>Follow-up</span>
-              <span v-if="wa.isFuAutoActive(activeLead)" class="sz-modal-nav-sdr-dot"></span>
+              <span v-if="wa.isFuAutoActive(slacOptsLead)" class="sz-modal-nav-sdr-dot"></span>
             </button>
             <button class="sz-modal-nav-item" :class="{ 'sz-modal-nav-item--active': activeSection === 'financeiro' }" @click="activeSection = 'financeiro'">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -641,10 +647,10 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/></svg>
               <span>Análise IA</span>
             </button>
-            <button class="sz-modal-nav-item" :class="{ 'sz-modal-nav-item--active': activeSection === 'sdr', 'sz-modal-nav-item--sdr': wa.isSdrActive(activeLead) }" @click="activeSection = 'sdr'">
+            <button class="sz-modal-nav-item" :class="{ 'sz-modal-nav-item--active': activeSection === 'sdr', 'sz-modal-nav-item--sdr': wa.isSdrActive(slacOptsLead) }" @click="activeSection = 'sdr'">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
               <span>SDR IA</span>
-              <span v-if="wa.isSdrActive(activeLead)" class="sz-modal-nav-sdr-dot"></span>
+              <span v-if="wa.isSdrActive(slacOptsLead)" class="sz-modal-nav-sdr-dot"></span>
             </button>
           </nav>
 
@@ -739,13 +745,13 @@
                   <div>
                     <p class="sz-sdr-toggle-title">Ativar neste chat</p>
                     <p class="sz-sdr-toggle-sub text-sm text-muted">
-                      {{ wa.isFuAutoActive(activeLead)
+                      {{ wa.isFuAutoActive(slacOptsLead)
                         ? 'Enviará follow-up se não houver resposta no prazo'
                         : 'Manda follow-up automático se o lead não responder' }}
                     </p>
                   </div>
-                  <button class="sz-sdr-pill" :class="{ 'sz-sdr-pill--on': wa.isFuAutoActive(activeLead) }"
-                    @click="wa.toggleFuAutoChat(activeLead, fuAutoHorasLocal)">
+                  <button class="sz-sdr-pill" :class="{ 'sz-sdr-pill--on': wa.isFuAutoActive(slacOptsLead) }"
+                    @click="wa.toggleFuAutoChat(slacOptsLead, fuAutoHorasLocal)">
                     <span class="sz-sdr-pill-thumb"></span>
                   </button>
                 </div>
@@ -754,7 +760,7 @@
                   <div class="form-group">
                     <label class="form-label">Enviar se não responder em</label>
                     <div class="sz-fuauto-horas-row">
-                      <select class="form-select" v-model="fuAutoHorasLocal" @change="wa.setFuAutoHoras(activeLead, fuAutoHorasLocal)" style="width:auto">
+                      <select class="form-select" v-model="fuAutoHorasLocal" @change="wa.setFuAutoHoras(slacOptsLead, fuAutoHorasLocal)" style="width:auto">
                         <option :value="1">1 hora</option>
                         <option :value="2">2 horas</option>
                         <option :value="3">3 horas</option>
@@ -768,14 +774,14 @@
                     </div>
                   </div>
 
-                  <div v-if="wa.isFuAutoActive(activeLead)" class="sz-sdr-active-info">
+                  <div v-if="wa.isFuAutoActive(slacOptsLead)" class="sz-sdr-active-info">
                     <div class="sz-sdr-active-row">
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                       Follow-up automático habilitado
                     </div>
-                    <div v-if="wa.fuAutoChats[wa.fuAutoKey(activeLead)]?.lastSentAt" class="sz-sdr-active-row">
+                    <div v-if="wa.fuAutoChats[wa.fuAutoKey(slacOptsLead)]?.lastSentAt" class="sz-sdr-active-row">
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                      Último enviado: {{ fmtDataHora(wa.fuAutoChats[wa.fuAutoKey(activeLead)]?.lastSentAt) }}
+                      Último enviado: {{ fmtDataHora(wa.fuAutoChats[wa.fuAutoKey(slacOptsLead)]?.lastSentAt) }}
                     </div>
                     <div v-if="!wa.scriptBase" class="sz-sdr-active-row sz-sdr-active-row--warn">
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>
@@ -924,18 +930,18 @@
                 <div>
                   <p class="sz-sdr-toggle-title">Ativar SDR neste chat</p>
                   <p class="sz-sdr-toggle-sub text-sm text-muted">
-                    {{ wa.isSdrActive(activeLead)
-                      ? 'SDR respondendo automaticamente · ' + (wa.sdrChats[wa.sdrChatKey(activeLead)]?.msgCount || 0) + ' msgs enviadas'
+                    {{ wa.isSdrActive(slacOptsLead)
+                      ? 'SDR respondendo automaticamente · ' + (wa.sdrChats[wa.sdrChatKey(slacOptsLead)]?.msgCount || 0) + ' msgs enviadas'
                       : 'O agente responderá mensagens recebidas automaticamente' }}
                   </p>
                 </div>
-                <button class="sz-sdr-pill" :class="{ 'sz-sdr-pill--on': wa.isSdrActive(activeLead) }"
-                  @click="wa.toggleSdrChat(activeLead)" :disabled="!wa.sdrConfig.enabled">
+                <button class="sz-sdr-pill" :class="{ 'sz-sdr-pill--on': wa.isSdrActive(slacOptsLead) }"
+                  @click="wa.toggleSdrChat(slacOptsLead)" :disabled="!wa.sdrConfig.enabled">
                   <span class="sz-sdr-pill-thumb"></span>
                 </button>
               </div>
 
-              <div v-if="wa.isSdrActive(activeLead)" class="sz-sdr-active-info">
+              <div v-if="wa.isSdrActive(slacOptsLead)" class="sz-sdr-active-info">
                 <div class="sz-sdr-active-row">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                   Respostas automáticas habilitadas
@@ -952,9 +958,9 @@
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                   {{ sdrForaMotivo }}
                 </div>
-                <div v-if="wa.isSdrActive(activeLead) && activeLead?.etapa && !wa.sdrConfig.etapas.includes(activeLead.etapa)" class="sz-sdr-active-row sz-sdr-active-row--warn">
+                <div v-if="wa.isSdrActive(slacOptsLead) && slacOptsLead?.etapa && !wa.sdrConfig.etapas.includes(slacOptsLead.etapa)" class="sz-sdr-active-row sz-sdr-active-row--warn">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  Etapa "{{ activeLead.etapa }}" não configurada no SDR
+                  Etapa "{{ slacOptsLead.etapa }}" não configurada no SDR
                 </div>
               </div>
 
@@ -1335,6 +1341,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useWorkStore } from '@/stores/work'
 import { useFinStore } from '@/stores/fin'
 import { sb } from '@/lib/supabase'
+import { uid } from '@/utils/uid'
 import JSZip from 'jszip'
 
 const router  = useRouter()
@@ -1358,15 +1365,19 @@ const firstUnreadTs = ref(null)  // timestamp da última leitura ao abrir o chat
 const inputEl     = ref(null)
 const listEl      = ref(null)
 const sentinelEl  = ref(null)
-const chatsVisible = ref(20)
+const chatsVisible     = ref(20)
+const msgsOffset       = ref(0)
+const msgsHasMore      = ref(false)
+const loadingMoreMsgs  = ref(false)
 const isMobile    = ref(window.innerWidth < 768)
 const isDarkTheme = ref(document.documentElement.getAttribute('data-theme') !== 'light')
 
 const qrSrc = computed(() => isDarkTheme.value ? wa.qrImage : (wa.qrImageLight || wa.qrImage))
 
 // Config modal
-const opcoesSLACOpen = ref(false)
+const opcoesSLACOpen  = ref(false)
 const activeSection   = ref('contato')
+const slacOptsLead    = ref(null)   // lead do modal — independente do chat aberto
 const analisando      = ref(false)
 const erroAnalise     = ref(null)
 const followupDate    = ref('')
@@ -2323,11 +2334,16 @@ function openItemMenu(id, event) {
 function openSlacOpts(section = 'contato') {
   const chat = menuChat.value
   if (chat) {
-    activeLead.value = leads.leads.find(l => l.id === chat.lead.id) || chat.lead
+    slacOptsLead.value = leads.leads.find(l => l.id === chat.lead.id) || chat.lead
   }
   activeSection.value = section
   opcoesSLACOpen.value = true
   activeItemMenu.value = null
+}
+
+function openSlacOptsFromToolbar() {
+  slacOptsLead.value = activeLead.value
+  opcoesSLACOpen.value = true
 }
 
 function doTogglePin() {
@@ -2389,6 +2405,8 @@ async function apagarConversa() {
     if (activeLead.value?.id === lead.id || activeLead.value?.telefone === lead.telefone) {
       activeLead.value = null
       waMsgs.value = []
+      msgsOffset.value = 0
+      msgsHasMore.value = false
     }
     await wa.loadChats()
     toast('Conversa apagada', 'ok')
@@ -2575,11 +2593,10 @@ const leadWorkItems = computed(() =>
 )
 
 // ── Config Modal ──
-const activeCrmLead = computed(() =>
-  activeLead.value?.id
-    ? leads.leads.find(l => l.id === activeLead.value.id) ?? null
-    : null
-)
+const activeCrmLead = computed(() => {
+  const lead = slacOptsLead.value || activeLead.value
+  return lead?.id ? leads.leads.find(l => l.id === lead.id) ?? null : null
+})
 
 watch([opcoesSLACOpen, activeSection], () => {
   if (!opcoesSLACOpen.value || !activeCrmLead.value) return
@@ -2600,6 +2617,10 @@ watch(activeLead, () => {
   opcoesSLACOpen.value = false
   activeSection.value   = 'contato'
   erroAnalise.value     = null
+})
+
+watch(opcoesSLACOpen, (val) => {
+  if (!val) slacOptsLead.value = null
 })
 
 function onEscModal(e) {
@@ -2676,7 +2697,13 @@ async function analisarLead() {
   analisando.value  = true
   erroAnalise.value = null
   try {
-    const msgs = waMsgs.value
+    let rawMsgs = waMsgs.value
+    // Carrega mensagens do DB se o chat do modal não está aberto
+    if (!rawMsgs.length || activeLead.value?.id !== activeCrmLead.value.id) {
+      const loaded = await leads.loadConversas(activeCrmLead.value.id, { noStore: true })
+      rawMsgs = (loaded || []).filter(c => c.canal === 'whatsapp')
+    }
+    const msgs = rawMsgs
       .slice(-50)
       .map(m => ({ direcao: m.direcao, mensagem: (m.mensagem || '').slice(0, 500), data: m.data }))
     const { data, error } = await sb.functions.invoke('analyze-lead', {
@@ -2926,10 +2953,16 @@ async function openChat(chatLead) {
     ? (leads.leads.find(l => l.id === chatLead.id) || chatLead)
     : chatLead
   loadingMsgs.value = true
+  msgsOffset.value = 0
+  msgsHasMore.value = false
+  const PAGE = 50
   const all = chatLead.id
-    ? await leads.loadConversas(chatLead.id)
-    : await leads.loadConversasByPhone(chatLead.telefone)
-  waMsgs.value = (all || []).filter(c => c.canal === 'whatsapp')
+    ? await leads.loadConversas(chatLead.id, { limit: PAGE, offset: 0 })
+    : await leads.loadConversasByPhone(chatLead.telefone, { limit: PAGE, offset: 0 })
+  const filtered = (all || []).filter(c => c.canal === 'whatsapp')
+  waMsgs.value = filtered
+  msgsOffset.value = PAGE
+  msgsHasMore.value = (all || []).length === PAGE
   loadingMsgs.value = false
   // Restaura sugestão de IA da sessão para este chat
   restaurarSessaoAi(activeLead.value)
@@ -2943,6 +2976,34 @@ function closeChat() {
   activeLead.value = null
   clearInterval(msgPoller)
   msgPoller = null
+  msgsOffset.value = 0
+  msgsHasMore.value = false
+}
+
+async function loadMoreMsgs() {
+  if (!activeLead.value || !msgsHasMore.value || loadingMoreMsgs.value) return
+  loadingMoreMsgs.value = true
+  const el = messagesEl.value
+  const prevScrollHeight = el ? el.scrollHeight : 0
+  const PAGE = 50
+  try {
+    const all = activeLead.value.id
+      ? await leads.loadConversas(activeLead.value.id, { limit: PAGE, offset: msgsOffset.value, noStore: true })
+      : await leads.loadConversasByPhone(activeLead.value.telefone, { limit: PAGE, offset: msgsOffset.value })
+    const older = (all || []).filter(c => c.canal === 'whatsapp')
+    if (older.length) {
+      waMsgs.value = [...older, ...waMsgs.value]
+      msgsOffset.value += PAGE
+      msgsHasMore.value = (all || []).length === PAGE
+      nextTick(() => {
+        if (el) el.scrollTop = el.scrollHeight - prevScrollHeight
+      })
+    } else {
+      msgsHasMore.value = false
+    }
+  } finally {
+    loadingMoreMsgs.value = false
+  }
 }
 
 // ── Recording ──
@@ -3147,10 +3208,25 @@ async function pollMsgs() {
   if (!activeLead.value || _polling) return
   _polling = true
   try {
-    const all = activeLead.value.id
-      ? await leads.loadConversas(activeLead.value.id)
-      : await leads.loadConversasByPhone(activeLead.value.telefone)
-    const fresh = (all || []).filter(c => c.canal === 'whatsapp')
+    // Busca apenas mensagens a partir da última que já temos (evita recarregar tudo)
+    const realMsgs = waMsgs.value.filter(m => !m.id?.startsWith('opt_'))
+    const lastTs = realMsgs.at(-1)?.data
+
+    let q = sb.from('conversas').select('*')
+      .eq('user_id', uid())
+      .eq('canal', 'whatsapp')
+      .order('data', { ascending: true })
+    if (lastTs) q = q.gte('data', lastTs)
+    else q = q.limit(50)
+    if (activeLead.value.id) {
+      q = q.eq('lead_id', activeLead.value.id)
+    } else {
+      const phone = String(activeLead.value.telefone).replace(/\D/g, '').replace(/^55/, '').slice(-10)
+      q = q.is('lead_id', null).ilike('telefone', `%${phone}%`)
+    }
+    const { data } = await q
+    const fresh = data || []
+
     const existingIds = new Set(waMsgs.value.map(m => m.id))
     const added = fresh.filter(m => !existingIds.has(m.id))
     if (added.length) {
@@ -3160,10 +3236,7 @@ async function pollMsgs() {
         ...added,
       ].sort((a, b) => new Date(a.data) - new Date(b.data))
       scrollBottom()
-      // Toca som para mensagens recebidas novas
-      if (added.some(m => m.direcao === 'recebido')) {
-        playNotifSound()
-      }
+      if (added.some(m => m.direcao === 'recebido')) playNotifSound()
     }
     // Atualiza status das mensagens já na tela (entregue/lido)
     for (const m of fresh) {
@@ -4331,6 +4404,15 @@ onUnmounted(() => {
 
 .sz-msgs-loading { display: flex; justify-content: center; padding: 2rem; }
 .sz-no-msgs { text-align: center; color: var(--text-tertiary); font-size: .83rem; padding: 3rem 1rem; line-height: 1.7; }
+.sz-load-more-wrap { display: flex; justify-content: center; padding: .35rem 0 .5rem; }
+.sz-load-more-btn {
+  background: var(--bg-elevated); border: 1px solid var(--border-default);
+  color: var(--text-secondary); font-size: .71rem; padding: .28rem .9rem;
+  border-radius: 999px; cursor: pointer; transition: background .15s, color .15s;
+  font-family: inherit; display: flex; align-items: center; gap: .4rem;
+}
+.sz-load-more-btn:hover:not(:disabled) { background: var(--bg-overlay); color: var(--text-primary); }
+.sz-load-more-btn:disabled { opacity: .45; cursor: default; }
 
 /* ── Time separator ── */
 .sz-time-sep {

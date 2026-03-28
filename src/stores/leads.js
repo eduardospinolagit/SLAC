@@ -28,27 +28,32 @@ export const useLeadsStore = defineStore('leads', () => {
     leads.value = data || []
   }
 
-  async function loadConversas(leadId) {
-    const { data, error } = await sb
-      .from('conversas').select('*')
+  async function loadConversas(leadId, { limit, offset, noStore } = {}) {
+    const paged = limit !== undefined
+    let q = sb.from('conversas').select('*')
       .eq('user_id', uid())
       .eq('lead_id', leadId)
-      .order('data', { ascending: true })
+      .order('data', { ascending: !paged })
+    if (paged) q = q.range(offset || 0, (offset || 0) + limit - 1)
+    const { data, error } = await q
     if (error) return []
-    conversas.value = data || []
-    return conversas.value
+    const result = paged ? [...(data || [])].reverse() : (data || [])
+    if (!noStore) conversas.value = result
+    return result
   }
 
-  async function loadConversasByPhone(telefone) {
+  async function loadConversasByPhone(telefone, { limit, offset } = {}) {
     const phone = String(telefone).replace(/\D/g, '').replace(/^55/, '').slice(-10)
-    const { data, error } = await sb
-      .from('conversas').select('*')
+    const paged = limit !== undefined
+    let q = sb.from('conversas').select('*')
       .eq('user_id', uid())
       .is('lead_id', null)
       .ilike('telefone', `%${phone}%`)
-      .order('data', { ascending: true })
+      .order('data', { ascending: !paged })
+    if (paged) q = q.range(offset || 0, (offset || 0) + limit - 1)
+    const { data, error } = await q
     if (error) return []
-    return data || []
+    return paged ? [...(data || [])].reverse() : (data || [])
   }
 
   // ── Internal (não empurra undo stack) ──
