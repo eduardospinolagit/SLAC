@@ -2226,6 +2226,9 @@ async function refreshChats() {
   if (refreshingChats.value) return
   refreshingChats.value = true
   try {
+    // Pede ao servidor para reconectar e buscar histórico recente do WA,
+    // depois recarrega os chats do Supabase (já com as mensagens novas)
+    if (wa.connected) await wa.syncHistory()
     await wa.loadChats()
   } finally {
     refreshingChats.value = false

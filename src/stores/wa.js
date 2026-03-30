@@ -136,6 +136,14 @@ export const useWaStore = defineStore('wa', () => {
     slacLog('ZAP-007', 'WhatsApp desconectado')
   }
 
+  async function syncHistory() {
+    try {
+      await fetch(BASE_URL + '/sync-history', { method: 'POST' })
+      // Aguarda o servidor reconectar e processar o histórico antes de recarregar
+      await new Promise(r => setTimeout(r, 4000))
+    } catch {}
+  }
+
   async function loadChats() {
     const { data: convs, error: convErr } = await sb
       .from('conversas')
@@ -451,7 +459,7 @@ export const useWaStore = defineStore('wa', () => {
     connected, hasQr, qrImage, qrImageLight, serverOnline,
     checkStatus, disconnect, sendToken,
     loadTemplates, saveTemplate, deleteTemplate,
-    loadConfig, saveConfig, loadChats,
+    loadConfig, saveConfig, loadChats, syncHistory,
     enviarMensagem, enviarArquivo, gerarScript,
     // SDR
     sdrConfig, sdrChats, sdrLogs,
