@@ -47,6 +47,9 @@
             </div>
           </div>
           <div class="sz-sidebar-actions">
+            <button class="sz-action-btn" @click="refreshChats" :disabled="refreshingChats" title="Atualizar conversas" aria-label="Atualizar conversas">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{ 'sz-spin': refreshingChats }"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            </button>
             <button class="sz-action-btn" @click="novaConversaOpen = true" title="Nova Conversa" aria-label="Nova conversa">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
@@ -1018,7 +1021,8 @@ const work    = useWorkStore()
 const fin     = useFinStore()
 const toast   = inject('toast')
 
-const search      = ref('')
+const search           = ref('')
+const refreshingChats  = ref(false)
 const activeLead  = ref(null)
 const waMsgs      = ref([])
 const loadingMsgs = ref(false)
@@ -2216,6 +2220,16 @@ function onDocClick(e) {
 function togglePerdidosFilter() {
   opcoesGeralOpen.value = false
   chatFilter.value = chatFilter.value === 'perdidos' ? 'tudo' : 'perdidos'
+}
+
+async function refreshChats() {
+  if (refreshingChats.value) return
+  refreshingChats.value = true
+  try {
+    await wa.loadChats()
+  } finally {
+    refreshingChats.value = false
+  }
 }
 
 function marcarTodasLidas() {
