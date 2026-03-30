@@ -138,9 +138,10 @@ export const useWaStore = defineStore('wa', () => {
 
   async function syncHistory() {
     try {
-      await fetch(BASE_URL + '/sync-history', { method: 'POST' })
-      // Aguarda o servidor reconectar e processar o histórico antes de recarregar
-      await new Promise(r => setTimeout(r, 4000))
+      const r = await fetch(BASE_URL + '/sync-history', { method: 'POST' })
+      if (!r.ok) return  // token não enviado ainda ou servidor offline — não bloqueia o refresh
+      // Aguarda o servidor processar o histórico antes de recarregar do Supabase
+      await new Promise(r => setTimeout(r, 8000))
     } catch {}
   }
 
