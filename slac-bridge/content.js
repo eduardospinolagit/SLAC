@@ -100,40 +100,57 @@
         try {
           const msgs = await window.WPP.chat.getMessages(chatId, { count: 9999, direction: 'before' })
 
-          // Resolve telefone: @lid usa Multi-Device, busca o número real via contato
+          // Resolve telefone real — tenta múltiplas fontes em ordem de confiabilidade
           let phone = chatId.replace('@c.us', '').replace('@s.whatsapp.net', '').replace('@lid', '')
-          if (chatId.endsWith('@lid')) {
-            try {
-              const contact = await window.WPP.contact.get(chatId)
-              const raw = contact?.phone || contact?.formattedUser || ''
-              if (raw) {
-                const cleaned = String(raw).replace(/\D/g, '').replace(/^55/, '').slice(-11)
-                if (cleaned && cleaned.length >= 8) phone = cleaned
-              }
-            } catch {}
 
-            // Fallback: extrai telefone do id._serialized das mensagens
-            // Formato: "fromMe_JID_msgId" onde JID pode ser "554788157140@c.us"
-            // Mais confiável que WPP.contact.get() para @lid
-            const lidId = chatId.replace('@lid', '')
-            if (phone === lidId) { // resolução falhou — phone ainda é o ID interno do @lid
+          if (chatId.endsWith('@lid')) {
+            const lidId = phone // ID interno @lid — não é telefone real
+
+            function cleanPhone(raw) {
+              const d = String(raw || '').replace(/\D/g, '').replace(/^55/, '')
+              return (d.length >= 8 && d.length <= 13 && d !== lidId) ? d : null
+            }
+
+            // Fonte 1: chat.contact da lista (já carregado em memória)
+            phone = cleanPhone(chat.contact?.phone)
+              || cleanPhone(chat.contact?.formattedUser)
+              || null
+
+            // Fonte 2: WPP.contact.get()
+            if (!phone) {
+              try {
+                const c = await window.WPP.contact.get(chatId)
+                phone = cleanPhone(c?.phone) || cleanPhone(c?.formattedUser) || null
+              } catch {}
+            }
+
+            // Fonte 3: JID @c.us dentro do msg.id._serialized ("false_55PHONE@c.us_MSGID")
+            if (!phone) {
               for (const msg of (msgs || [])) {
-                const serial = msg.id?._serialized || ''
-                const parts  = serial.split('_')
+                const parts = (msg.id?._serialized || '').split('_')
                 if (parts.length >= 3) {
                   const jid = parts[1] || ''
                   if (jid.endsWith('@c.us') || jid.endsWith('@s.whatsapp.net')) {
-                    const candidate = jid
-                      .replace('@c.us', '').replace('@s.whatsapp.net', '')
-                      .replace(/^55/, '')
-                    if (candidate.length >= 8 && candidate !== lidId) {
-                      phone = candidate
-                      break
-                    }
+                    const p = cleanPhone(jid.replace(/@\w+\.net|@c\.us/g, ''))
+                    if (p) { phone = p; break }
                   }
                 }
               }
             }
+
+            // Fonte 4: msg.from / msg.author (campos diretos do WPP)
+            if (!phone) {
+              for (const msg of (msgs || [])) {
+                const jid = msg.from || msg.author || ''
+                if (typeof jid === 'string' && (jid.includes('@c.us') || jid.includes('@s.whatsapp.net'))) {
+                  const p = cleanPhone(jid.replace(/@\w+\.net|@c\.us/g, ''))
+                  if (p) { phone = p; break }
+                }
+              }
+            }
+
+            if (!phone) phone = lidId // sem resolução — usa o @lid ID como fallback
+
           } else {
             phone = phone.replace(/^55/, '')
           }
