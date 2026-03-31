@@ -105,9 +105,35 @@
           if (chatId.endsWith('@lid')) {
             try {
               const contact = await window.WPP.contact.get(chatId)
-              const raw = contact?.phone || contact?.id?.user || contact?.formattedUser || ''
-              if (raw) phone = String(raw).replace(/\D/g, '').replace(/^55/, '').slice(-11) || phone
+              const raw = contact?.phone || contact?.formattedUser || ''
+              if (raw) {
+                const cleaned = String(raw).replace(/\D/g, '').replace(/^55/, '').slice(-11)
+                if (cleaned && cleaned.length >= 8) phone = cleaned
+              }
             } catch {}
+
+            // Fallback: extrai telefone do id._serialized das mensagens
+            // Formato: "fromMe_JID_msgId" onde JID pode ser "554788157140@c.us"
+            // Mais confiável que WPP.contact.get() para @lid
+            const lidId = chatId.replace('@lid', '')
+            if (phone === lidId) { // resolução falhou — phone ainda é o ID interno do @lid
+              for (const msg of (msgs || [])) {
+                const serial = msg.id?._serialized || ''
+                const parts  = serial.split('_')
+                if (parts.length >= 3) {
+                  const jid = parts[1] || ''
+                  if (jid.endsWith('@c.us') || jid.endsWith('@s.whatsapp.net')) {
+                    const candidate = jid
+                      .replace('@c.us', '').replace('@s.whatsapp.net', '')
+                      .replace(/^55/, '')
+                    if (candidate.length >= 8 && candidate !== lidId) {
+                      phone = candidate
+                      break
+                    }
+                  }
+                }
+              }
+            }
           } else {
             phone = phone.replace(/^55/, '')
           }
