@@ -48,13 +48,27 @@
     return 'sent'
   }
 
+  // Tipos que devem ser pulados (sistema, notificações, apagadas)
+  const SKIP_TYPES = new Set([
+    'revoked', 'protocol', 'ciphertext',
+    'e2e_notification', 'notification', 'notification_template',
+    'gp2', 'gp2_invite', 'groups_v4_invite_message',
+    'call_log', 'ephemeral_setting', 'unknown',
+  ])
+
   function labelPorTipo(type) {
     const map = {
-      image: '[Imagem]', video: '[Vídeo]',
-      audio: '[Áudio]',  ptt:   '[Áudio]',
+      image: '[Imagem]', video: '[Vídeo]', gif: '[GIF]',
+      audio: '[Áudio]',  ptt:  '[Áudio]',
       document: '[Documento]', sticker: '[Sticker]',
+      location: '[Localização]', contact: '[Contato]',
+      vcard: '[Contato]', multi_vcard: '[Contatos]',
+      list: '[Lista]', list_response: '[Resposta]',
+      buttons_response: '[Resposta]', template_button_reply: '[Resposta]',
+      product: '[Produto]', order: '[Pedido]',
+      poll_creation: '[Enquete]', poll_vote: '[Voto]',
     }
-    return map[type] || '[Mídia]'
+    return map[type] || null // null = pular a mensagem
   }
 
   async function isSyncPaused() {
@@ -175,13 +189,17 @@
 
           for (const msg of (msgs || [])) {
             if (!msg.id) continue
+            // Pula mensagens de sistema e sem conteúdo relevante
+            if (SKIP_TYPES.has(msg.type)) continue
+            const label = msg.body || labelPorTipo(msg.type)
+            if (!label) continue // tipo desconhecido sem body — pula
             const fromMe = msg.id?.fromMe ?? msg.fromMe ?? false
             rows.push({
               id:           'wa_' + (msg.id?._serialized || msg.id),
               user_id:      null,
               canal:        'whatsapp',
               direcao:      fromMe ? 'enviado' : 'recebido',
-              mensagem:     msg.body || labelPorTipo(msg.type),
+              mensagem:     label,
               data:         new Date((msg.t || Date.now() / 1000) * 1000).toISOString(),
               telefone:     phone,
               status:       ackToStatus(msg.ack, fromMe),
