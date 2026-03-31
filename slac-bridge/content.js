@@ -38,6 +38,16 @@
   // ── Helpers ──
   function sleep(ms) { return new Promise(r => setTimeout(r, ms)) }
 
+  function ackToStatus(ack, fromMe) {
+    if (!fromMe) return 'received'
+    const n = Number(ack)
+    if (n === 0) return 'pending'
+    if (n === 1) return 'sent'
+    if (n === 2) return 'delivered'
+    if (n >= 3) return 'read'
+    return 'sent'
+  }
+
   function labelPorTipo(type) {
     const map = {
       image: '[Imagem]', video: '[Vídeo]',
@@ -174,7 +184,7 @@
               mensagem:     msg.body || labelPorTipo(msg.type),
               data:         new Date((msg.t || Date.now() / 1000) * 1000).toISOString(),
               telefone:     phone,
-              status:       fromMe ? 'sent' : 'received',
+              status:       ackToStatus(msg.ack, fromMe),
               contato_nome: name,
             })
           }
