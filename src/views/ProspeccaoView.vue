@@ -387,7 +387,9 @@ async function contModalEnviar() {
         lead.id || null,
         auth.user.id,
         lead.telefone,
-        contModalMsg.value.trim()
+        contModalMsg.value.trim(),
+        null,
+        lead.negocio || lead.nome || null
       )
     }
     // Marca como contatado (tabela) ou avança no foco

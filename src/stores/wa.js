@@ -145,6 +145,16 @@ export const useWaStore = defineStore('wa', () => {
     } catch {}
   }
 
+  // Força reconexão sem apagar sessão — re-dispara messaging-history.set
+  // O buffer do servidor segura as mensagens até o token chegar
+  async function reconnect() {
+    try {
+      await fetch(BASE_URL + '/reconnect', { method: 'POST' })
+      connected.value = false
+      hasQr.value     = false
+    } catch {}
+  }
+
   async function loadChats() {
     const { data: convs, error: convErr } = await sb
       .from('conversas')
@@ -262,9 +272,10 @@ export const useWaStore = defineStore('wa', () => {
     return data
   }
 
-  async function enviarMensagem(leadId, userId, telefone, mensagem, quoted) {
+  async function enviarMensagem(leadId, userId, telefone, mensagem, quoted, contatoNome) {
     const body = { telefone, mensagem, lead_id: leadId, user_id: userId }
     if (quoted?.id) body.quoted_id = quoted.id
+    if (contatoNome) body.contato_nome = contatoNome
     const r = await fetch(BASE_URL + '/send-text', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -458,7 +469,7 @@ export const useWaStore = defineStore('wa', () => {
     unreadCounts, totalUnread, notifChats,
     storeIncrementUnread, storeClearUnread, storeClearAllUnread, storeSetUnread, storeSetAllUnread,
     connected, hasQr, qrImage, qrImageLight, serverOnline,
-    checkStatus, disconnect, sendToken,
+    checkStatus, disconnect, sendToken, reconnect,
     loadTemplates, saveTemplate, deleteTemplate,
     loadConfig, saveConfig, loadChats, syncHistory,
     enviarMensagem, enviarArquivo, gerarScript,
