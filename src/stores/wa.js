@@ -199,8 +199,8 @@ export const useWaStore = defineStore('wa', () => {
 
       // Telefones já cobertos por leads vinculados via lead_id (evita duplicata na lista)
       const phonesEmLeadMap = new Set()
-      for (const l of (leadsData || [])) {
-        const tail = l.telefone?.replace(/\D/g, '').slice(-8)
+      for (const entry of result) {
+        const tail = entry.lead?.telefone?.replace(/\D/g, '').slice(-8)
         if (tail) phonesEmLeadMap.add(tail)
       }
 
