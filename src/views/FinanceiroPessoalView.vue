@@ -31,19 +31,42 @@
       <div class="kpi-card">
         <span class="kpi-label">Receitas</span>
         <span class="kpi-value kpi-value--accent">{{ fp.fmt(recMes) }}</span>
-        <span class="kpi-sub">{{ listaFiltrada.filter(t=>t.tipo==='entrada').length }} entradas</span>
+        <div class="kpi-detail-row">
+          <span class="kpi-detail-item">
+            <span class="kpi-dot kpi-dot--ok"></span>
+            Recebido <strong>{{ fp.fmt(recPago) }}</strong>
+          </span>
+          <span class="kpi-detail-item" v-if="recPendente > 0">
+            <span class="kpi-dot kpi-dot--warn"></span>
+            A receber <strong>{{ fp.fmt(recPendente) }}</strong>
+          </span>
+        </div>
       </div>
       <div class="kpi-card">
         <span class="kpi-label">Despesas</span>
         <span class="kpi-value kpi-value--danger">{{ fp.fmt(saiMes) }}</span>
-        <span class="kpi-sub">{{ listaFiltrada.filter(t=>t.tipo==='saida').length }} saídas</span>
+        <div class="kpi-detail-row">
+          <span class="kpi-detail-item">
+            <span class="kpi-dot kpi-dot--danger"></span>
+            Pago <strong>{{ fp.fmt(saiPago) }}</strong>
+          </span>
+          <span class="kpi-detail-item" v-if="saiPendente > 0">
+            <span class="kpi-dot kpi-dot--warn"></span>
+            Pendente <strong>{{ fp.fmt(saiPendente) }}</strong>
+          </span>
+        </div>
       </div>
       <div class="kpi-card">
-        <span class="kpi-label">Saldo</span>
-        <span class="kpi-value" :style="{ color: saldoMes >= 0 ? 'var(--accent)' : 'var(--status-danger)' }">
-          {{ fp.fmt(saldoMes) }}
+        <span class="kpi-label">Saldo atual</span>
+        <span class="kpi-value" :style="{ color: saldoAtual >= 0 ? 'var(--accent)' : 'var(--status-danger)' }">
+          {{ fp.fmt(saldoAtual) }}
         </span>
-        <span class="kpi-sub">{{ saldoMes >= 0 ? 'superávit' : 'déficit' }}</span>
+        <div class="kpi-detail-row">
+          <span class="kpi-detail-item">
+            <span class="kpi-dot" :style="{ background: saldoMes >= 0 ? 'var(--status-info)' : 'var(--status-warning)' }"></span>
+            Projetado <strong>{{ fp.fmt(saldoMes) }}</strong>
+          </span>
+        </div>
       </div>
     </div>
 
@@ -266,9 +289,16 @@ const listaFiltrada = computed(() => {
 
 const catsDisponiveis = computed(() => [...new Set(fp.items.map(t => t.cat))].sort())
 
-const recMes   = computed(() => listaFiltrada.value.filter(t => t.tipo === 'entrada').reduce((s, t) => s + Number(t.val), 0))
-const saiMes   = computed(() => listaFiltrada.value.filter(t => t.tipo === 'saida').reduce((s, t) => s + Number(t.val), 0))
-const saldoMes = computed(() => recMes.value - saiMes.value)
+const recPago     = computed(() => listaFiltrada.value.filter(t => t.tipo === 'entrada' && t.st === 'pago').reduce((s, t) => s + Number(t.val), 0))
+const recPendente = computed(() => listaFiltrada.value.filter(t => t.tipo === 'entrada' && t.st === 'pendente').reduce((s, t) => s + Number(t.val), 0))
+const recMes      = computed(() => recPago.value + recPendente.value)
+
+const saiPago     = computed(() => listaFiltrada.value.filter(t => t.tipo === 'saida' && t.st === 'pago').reduce((s, t) => s + Number(t.val), 0))
+const saiPendente = computed(() => listaFiltrada.value.filter(t => t.tipo === 'saida' && t.st === 'pendente').reduce((s, t) => s + Number(t.val), 0))
+const saiMes      = computed(() => saiPago.value + saiPendente.value)
+
+const saldoAtual  = computed(() => recPago.value - saiPago.value)
+const saldoMes    = computed(() => recMes.value - saiMes.value)
 
 // Chart
 const chartCat = ref(null)
@@ -388,6 +418,21 @@ function fmtData(d) {
 </script>
 
 <style scoped>
+.kpi-detail-row {
+  display: flex; flex-direction: column; gap: .2rem; margin-top: .375rem;
+}
+.kpi-detail-item {
+  display: flex; align-items: center; gap: .35rem;
+  font-size: .72rem; color: var(--text-tertiary);
+}
+.kpi-detail-item strong { color: var(--text-secondary); font-weight: 600; }
+.kpi-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+.kpi-dot--ok     { background: var(--accent); }
+.kpi-dot--warn   { background: var(--status-warning); }
+.kpi-dot--danger { background: var(--status-danger); }
+
 .empty-state {
   display: flex; flex-direction: column; align-items: center; gap: .75rem;
   padding: 3rem 1rem; color: var(--text-tertiary); text-align: center;
